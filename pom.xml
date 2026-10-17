@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.zyneonstudios.apex</groupId>
+    <artifactId>nex-app-legacy</artifactId>
+    <version>3.0.42</version>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <nexus.name>Reformatio</nexus.name>
+        <nexus.type>experimental</nexus.type>
+        <app.mainClass>com.zyneonstudios.apex.nexapp.Main</app.mainClass>
+        <app.name>NEX App (Legacy)</app.name>
+        <app.vendor>Zyneon Apex</app.vendor>
+        <app.version.jpackage>${version}</app.version.jpackage>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>nerofy-releases</id>
+            <url>https://maven.nrfy.net/releases</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- MAVEN CENTRAL REPOSITORY -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>3.5.16</version>
+        </dependency>
+        <dependency>
+            <groupId>com.starxg</groupId>
+            <artifactId>java-keytar</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <!-- to fix dependency security issues -->
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.20.0</version>
+        </dependency>
+
+        <!-- FLOWARG MINECRAFT LAUNCH PROCESS DEPENDENCIES -->
+        <dependency>
+            <groupId>fr.flowarg</groupId>
+            <artifactId>flowupdater</artifactId>
+            <version>1.9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.flowarg</groupId>
+            <artifactId>openlauncherlib</artifactId>
+            <version>3.2.11</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.flowarg</groupId>
+            <artifactId>azuljavadownloader</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+
+        <!-- NEROFY PUBLIC REPOSITORY -->
+        <dependency>
+            <groupId>live.nerotv</groupId>
+            <artifactId>a-minecraft-launcher</artifactId>
+            <version>2025.12.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zyneonstudios.nexus</groupId>
+            <artifactId>base-desktop</artifactId>
+            <version>2025.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zyneonstudios.nexus</groupId>
+            <artifactId>zyndex-java</artifactId>
+            <version>2025.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zyneonstudios.apex</groupId>
+            <artifactId>mojang-auth</artifactId>
+            <version>2025.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zyneonstudios.apex</groupId>
+            <artifactId>jauri-webview</artifactId>
+            <version>0.30</version>
+        </dependency>
+
+        <!-- JITPACK.IO REPOSITORY -->
+        <dependency>
+            <groupId>com.github.steos</groupId>
+            <artifactId>jnafilechooser</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.MinnDevelopment</groupId>
+            <artifactId>java-discord-rpc</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Querz</groupId>
+            <artifactId>NBT</artifactId>
+            <version>6.1</version>
+        </dependency>
+    </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>nerofy-releases</id>
+            <name>Nerofy Network Maven repository</name>
+            <url>https://maven.nrfy.net/releases</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.source}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>4.1.0</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${app.mainClass}</mainClass>
+                                    <manifestEntries>
+                                        <!-- Required by JCEF on macOS (CefBrowserWindowMac accesses AWT internals) -->
+                                        <Add-Opens>java.desktop/sun.awt java.desktop/sun.lwawt java.desktop/sun.lwawt.macosx java.desktop/sun.java2d</Add-Opens>
+                                        <Add-Exports>java.desktop/sun.awt java.desktop/sun.lwawt java.desktop/sun.lwawt.macosx java.desktop/sun.java2d</Add-Exports>
+                                        <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+                                    </manifestEntries>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.handlers</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.schemas</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring/org.springframework.boot.actuate.autoconfigure.web.ManagementContextConfiguration.imports</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>zip</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+        </plugins>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.1</version>
+            </extension>
+        </extensions>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>windows-exe</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>remove-read-only-for-clean</id>
+                                <phase>pre-clean</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec executable="cmd" failonerror="false">
+                                            <arg value="/c"/>
+                                            <arg value="attrib"/>
+                                            <arg value="-R"/>
+                                            <arg value="${project.build.directory}\*.*"/>
+                                            <arg value="/S"/>
+                                            <arg value="/D"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>remove-read-only-for-appimage</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec executable="cmd" failonerror="true">
+                                            <arg value="/c"/>
+                                            <arg value="attrib"/>
+                                            <arg value="-R"/>
+                                            <arg value="${project.build.directory}\${app.name}\*.*"/>
+                                            <arg value="/S"/>
+                                            <arg value="/D"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>remove-read-only-for-installers</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec executable="cmd" failonerror="true">
+                                            <arg value="/c"/>
+                                            <arg value="attrib"/>
+                                            <arg value="-R"/>
+                                            <arg value="${project.build.directory}\*.*"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>move-zip-and-rename</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!--suppress UnresolvedMavenProperty -->
+                                        <move file="${project.build.directory}/${app.name}" tofile="${project.build.directory}/${app.name}-${project.version}-windows-${os.detected.arch}" failonerror="false" quiet="true"/>
+                                        <!--suppress UnresolvedMavenProperty -->
+                                        <zip destfile="${project.build.directory}/${app.name}-${project.version}-windows-${os.detected.arch}.zip" basedir="${project.build.directory}/${app.name}-${project.version}-windows-${os.detected.arch}"/>
+                                        <move file="${project.build.directory}/${app.name}-${project.version}-windows-aarch_64.zip" tofile="${project.build.directory}/${app.name}-${project.version}-windows-aarch64.zip" failonerror="false" quiet="true"/>
+                                        <!--suppress UnresolvedMavenProperty -->
+                                        <move file="${project.build.directory}/${app.name}-${project.version}.exe" tofile="${project.build.directory}/Install ${app.name}-${project.version}-${os.detected.arch}.exe" failonerror="false" quiet="true"/>
+                                        <!--suppress UnresolvedMavenProperty -->
+                                        <move file="${project.build.directory}/${app.name}-${project.version}.msi" tofile="${project.build.directory}/Install ${app.name}-${project.version}-${os.detected.arch}.msi" failonerror="false" quiet="true"/>
+                                        <move file="${project.build.directory}/Install ${app.name}-${project.version}-aarch_64.exe" tofile="${project.build.directory}/Install ${app.name}-${project.version}-aarch64.exe" failonerror="false" quiet="true"/>
+                                        <move file="${project.build.directory}/Install ${app.name}-${project.version}-aarch_64.msi" tofile="${project.build.directory}/Install ${app.name}-${project.version}-aarch64.msi" failonerror="false" quiet="true"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar" tofile="${project.build.directory}/${app.name}-${project.version}-static.jar" failonerror="false" quiet="true"/>
+                                        <delete file="${project.build.directory}/original-${project.artifactId}-${project.version}.jar"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>1.7.4</version>
+                        <executions>
+                            <execution>
+                                <id>jpackage</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <input>${project.build.directory}</input>
+                                    <destination>${project.build.directory}</destination>
+                                    <name>${app.name}</name>
+                                    <appVersion>${app.version.jpackage}</appVersion>
+                                    <vendor>${app.vendor}</vendor>
+                                    <mainJar>${project.build.finalName}.jar</mainJar>
+                                    <mainClass>${app.mainClass}</mainClass>
+                                    <icon>${project.basedir}/src/main/html/favicon.ico</icon>
+                                    <type>APP_IMAGE</type>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jpackage-installer</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <appImage>${project.build.directory}/${app.name}</appImage>
+                                    <destination>${project.build.directory}</destination>
+                                    <name>${app.name}</name>
+                                    <appVersion>${app.version.jpackage}</appVersion>
+                                    <vendor>${app.vendor}</vendor>
+                                    <icon>${project.basedir}/src/main/resources/setup.ico</icon>
+                                    <type>EXE</type>
+                                    <winDirChooser>false</winDirChooser>
+                                    <winShortcut>true</winShortcut>
+                                    <winMenu>true</winMenu>
+                                    <winMenuGroup>${app.vendor}</winMenuGroup>
+                                    <winUpgradeUuid>${nexapp.installer.legacy}</winUpgradeUuid>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jpackage-installer-msi</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <appImage>${project.build.directory}/${app.name}</appImage>
+                                    <destination>${project.build.directory}</destination>
+                                    <name>${app.name}</name>
+                                    <appVersion>${app.version.jpackage}</appVersion>
+                                    <vendor>${app.vendor}</vendor>
+                                    <icon>${project.basedir}/src/main/resources/setup.ico</icon>
+                                    <type>MSI</type>
+                                    <winDirChooser>false</winDirChooser>
+                                    <winShortcut>true</winShortcut>
+                                    <winMenu>true</winMenu>
+                                    <winMenuGroup>${app.vendor}</winMenuGroup>
+                                    <winUpgradeUuid>${nexapp.installer.legacy}</winUpgradeUuid>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>net.jsign</groupId>
+                        <artifactId>jsign-maven-plugin</artifactId>
+                        <version>7.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-app-image</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${project.build.directory}/${app.name}/${app.name}.exe</file>
+                                    <keystore>${project.basedir}/cert.pfx</keystore>
+                                    <storepass>${sign.cert.password}</storepass>
+                                    <tsaurl>http://timestamp.digicert.com</tsaurl>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>sign-installer</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${project.build.directory}/${app.name}-${app.version.jpackage}.exe</file>
+                                    <keystore>${project.basedir}/cert.pfx</keystore>
+                                    <storepass>${sign.cert.password}</storepass>
+                                    <tsaurl>http://timestamp.digicert.com</tsaurl>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>sign-installer-msi</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${project.build.directory}/${app.name}-${app.version.jpackage}.msi</file>
+                                    <keystore>${project.basedir}/cert.pfx</keystore>
+                                    <storepass>${sign.cert.password}</storepass>
+                                    <tsaurl>http://timestamp.digicert.com</tsaurl>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
