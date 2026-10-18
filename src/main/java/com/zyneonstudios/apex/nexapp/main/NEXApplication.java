@@ -22,7 +22,6 @@ import com.zyneonstudios.apex.nexapp.search.zyndex.local.LocalInstanceManager;
 import com.zyneonstudios.apex.nexapp.utilities.ApplicationLogger;
 import com.zyneonstudios.apex.nexapp.utilities.MicrosoftAuthenticator;
 import com.zyneonstudios.apex.nexapp.web.RootController;
-import com.zyneonstudios.nexus.desktop.NexusDesktop;
 import com.zyneonstudios.nexus.desktop.frame.web.NexusWebSetup;
 import com.zyneonstudios.nexus.index.ReadableZyndex;
 import com.zyneonstudios.nexus.utilities.file.FileActions;
@@ -94,14 +93,18 @@ public class NEXApplication {
      * @param uiPath The path to the UI or "online" for online UI.
      */
     public NEXApplication(String path, String uiPath) {
+        getLogger().log("Initializing application...");
+        operatingSystem = OperatingSystem.getType();
         instance = this;
+
+        getLogger().log("Initializing console handler and backend server...");
         consoleHandler = new NexusConsoleHandler();
         consoleHandler.startReading();
         initCommands();
 
-        operatingSystem = OperatingSystem.getType();
 
         // Setup working directory
+        getLogger().log("Setup working directory...");
         File workingDirFile = new File(path);
         if (workingDirFile.mkdirs()) {
             getLogger().deb("Creating working directory (first run)...");
@@ -109,19 +112,22 @@ public class NEXApplication {
         workingDir = workingDirFile.getAbsolutePath().replace("\\", "/");
 
         // Setup settings and data storage
+        getLogger().log("Setup settings and data storage...");
         settings = new JsonStorage(workingDirFile.getAbsolutePath() + "/data/settings.json");
         data = new JsonStorage(workingDirFile.getAbsolutePath() + "/data/application.json");
 
         // Determine UI mode (online or local)
+        getLogger().log("Checking for online ui...");
         this.onlineUI = uiPath != null && uiPath.equals("online");
         if (!onlineUI) {
             this.uiPath = (uiPath != null) ? uiPath : workingDirFile.getAbsolutePath() + "/temp/ui";
         }
 
+        getLogger().log("Preparing temp folder...");
         setupTempDirectory();
-        setupWebEnvironment(workingDirFile);
-        getLogger().log("Initializing application...");
 
+
+        getLogger().log("Loading settings...");
         settings.ensure("settings.window.mergeNavigation", operatingSystem.equals(OperatingSystem.Type.Windows));
         localSettings.setMergeNavigation(settings.getBool("settings.window.mergeNavigation"));
 
@@ -211,8 +217,11 @@ public class NEXApplication {
         settings.ensure("settings.minecraft.onExitCommands",new ArrayList<>());
         localSettings.setDefaultMinecraftOnExitCommands((ArrayList<String>)settings.get("settings.minecraft.onExitCommands"));
 
-        instanceManager = new LocalInstanceManager(new JsonStorage(workingDirFile.getAbsolutePath() + "/data/instances.json"));
+        if(localSettings.useFallbackWindow()||Main.useFallbackFrame()) {
+            setupWebEnvironment(workingDirFile);
+        }
 
+        instanceManager = new LocalInstanceManager(new JsonStorage(workingDirFile.getAbsolutePath() + "/data/instances.json"));
         CurseForgeCategories.init();
 
         CompletableFuture.runAsync(()->{
@@ -232,7 +241,6 @@ public class NEXApplication {
             getLogger().log("Initializing NEX connection...");
             NEX = new ReadableZyndex("https://zyneonstudios.github.io/nexus-nex/zyndex/index.json");
         });
-
         this.downloadManager = new DownloadManager(this);
     }
 
@@ -440,10 +448,16 @@ public class NEXApplication {
                 getInstance().getModuleLoader().deactivateModules();
             }
         } catch (Exception ignore) {}
-        disposeCef();
-        forceKillJcefHelpers();
+        try {
+            if(getInstance().getLocalSettings().useFallbackWindow()||Main.useFallbackFrame()) {
+                disposeCef();
+                forceKillJcefHelpers();
+            }
+        } catch (Exception ignore) {}
+        try {
+            getInstance().getApplicationFrame().close();
+        } catch (Exception ignore) {}
         FileActions.deleteFolder(new File((NEXApplication.getInstance().getWorkingPath()+"/temp/").replace("\\","/").replace("//","/")));
-        getInstance().getApplicationFrame().close();
         System.exit(exitCode);
     }
 
@@ -676,66 +690,77 @@ public class NEXApplication {
     /**
      * Initializes and returns a Minecraft launcher with application auth infos
      *
-     * @return A pre-initialized Vanilla launcher
+     * @param path The path to the Minecraft installation directory
+     * @return A pre-initialized Vanilla launcher (or null if not signed in)
      */
-    public live.nerotv.aminecraftlauncher.launcher.VanillaLauncher getVanillaLauncher() {
-        return new live.nerotv.aminecraftlauncher.launcher.VanillaLauncher(authInfos);
-    }
-
     public VanillaLauncher getVanillaLauncher(String path) {
-        return new VanillaLauncher(path,authInfos);
+        if(authInfos!=null) {
+            return new VanillaLauncher(path, authInfos);
+        } else {
+            getLogger().err("You have to be signed in to use this feature. Please sign in with a Microsoft account that owns the game.");
+            return null;
+        }
     }
 
     /**
      * Initializes and returns a Minecraft launcher with application auth infos
      *
-     * @return A pre-initialized Fabric launcher
+     * @param path The path to the Minecraft installation directory
+     * @return A pre-initialized Fabric launcher (or null if not signed in)
      */
-    public live.nerotv.aminecraftlauncher.launcher.FabricLauncher getFabricLauncher() {
-        return new live.nerotv.aminecraftlauncher.launcher.FabricLauncher(authInfos);
-    }
 
     public FabricLauncher getFabricLauncher(String path) {
-        return new FabricLauncher(path,authInfos);
+        if(authInfos!=null) {
+            return new FabricLauncher(path, authInfos);
+        } else {
+            getLogger().err("You have to be signed in to use this feature. Please sign in with a Microsoft account that owns the game.");
+            return null;
+        }
     }
 
     /**
      * Initializes and returns a Minecraft launcher with application auth infos
      *
-     * @return A pre-initialized Forge launcher
+     * @param path The path to the Minecraft installation directory
+     * @return A pre-initialized Forge launcher (or null if not signed in)
      */
-    public live.nerotv.aminecraftlauncher.launcher.ForgeLauncher getForgeLauncher() {
-        return new live.nerotv.aminecraftlauncher.launcher.ForgeLauncher(authInfos);
-    }
-
     public ForgeLauncher getForgeLauncher(String path) {
-        return new ForgeLauncher(path,authInfos);
+        if(authInfos!=null) {
+            return new ForgeLauncher(path, authInfos);
+        } else {
+            getLogger().err("You have to be signed in to use this feature. Please sign in with a Microsoft account that owns the game.");
+            return null;
+        }
     }
 
     /**
      * Initializes and returns a Minecraft launcher with application auth infos
      *
-     * @return A pre-initialized NeoForge launcher
+     * @param path The path to the Minecraft installation directory
+     * @return A pre-initialized NeoForge launcher (or null if not signed in)
      */
-    public live.nerotv.aminecraftlauncher.launcher.NeoForgeLauncher getNeoForgeLauncher() {
-        return new live.nerotv.aminecraftlauncher.launcher.NeoForgeLauncher(authInfos);
-    }
-
     public NeoForgeLauncher getNeoForgeLauncher(String path) {
-        return new NeoForgeLauncher(path,authInfos);
+        if(authInfos!=null) {
+            return new NeoForgeLauncher(path, authInfos);
+        } else {
+            getLogger().err("You have to be signed in to use this feature. Please sign in with a Microsoft account that owns the game.");
+            return null;
+        }
     }
 
     /**
      * Initializes and returns a Minecraft launcher with application auth infos
      *
-     * @return A pre-initialized Quilt launcher
+     * @param path The path to the Minecraft installation directory
+     * @return A pre-initialized Quilt launcher (or null if not signed in)
      */
-    public live.nerotv.aminecraftlauncher.launcher.QuiltLauncher getQuiltLauncher() {
-        return new live.nerotv.aminecraftlauncher.launcher.QuiltLauncher(authInfos);
-    }
-
     public QuiltLauncher getQuiltLauncher(String path) {
-        return new QuiltLauncher(path,authInfos);
+        if(authInfos!=null) {
+            return new QuiltLauncher(path, authInfos);
+        } else {
+            getLogger().err("You have to be signed in to use this feature. Please sign in with a Microsoft account that owns the game.");
+            return null;
+        }
     }
 
     /**

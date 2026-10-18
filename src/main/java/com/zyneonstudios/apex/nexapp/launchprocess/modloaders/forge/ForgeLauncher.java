@@ -1,6 +1,7 @@
 package com.zyneonstudios.apex.nexapp.launchprocess.modloaders.forge;
 
 import com.zyneonstudios.apex.nexapp.Main;
+import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftVersionUtils;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.ModloaderLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaLauncher;
 import com.zyneonstudios.apex.nexapp.utilities.JavaUtilities;
@@ -8,7 +9,6 @@ import com.zyneonstudios.nexus.utilities.system.OperatingSystem;
 import fr.flowarg.openlauncherlib.NoFramework;
 import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
 import fr.theshark34.openlauncherlib.minecraft.GameFolder;
-import live.nerotv.aminecraftlauncher.launcher.MinecraftVersion;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -84,9 +84,9 @@ public class ForgeLauncher extends VanillaLauncher implements ModloaderLauncher 
                         }
                     }
                 }
-                JavaUtilities.setJava(MinecraftVersion.getType(getMinecraftVersion()));
+                JavaUtilities.setJava(MinecraftVersionUtils.getType(getMinecraftVersion()));
                 try {
-                    this.gameProcess = getFramework().launch(getMinecraftVersion(), ForgeVersionPatches.forLauncher(modloaderVersion,getMinecraftVersion()), NoFramework.ModLoader.FORGE);
+                    this.gameProcess = getFramework().launch(getMinecraftVersion(), MinecraftVersionUtils.forgeForLauncher(modloaderVersion,getMinecraftVersion()), NoFramework.ModLoader.FORGE);
                     getPostLaunchHook().run();
                     this.gameProcess.onExit().thenRun(() -> {
                         getPostCloseHook().run();

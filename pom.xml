@@ -6,12 +6,12 @@
 
     <groupId>com.zyneonstudios.apex</groupId>
     <artifactId>nex-app-legacy</artifactId>
-    <version>3.0.44</version>
+    <version>3.1.0</version>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nexus.name>Reformatio</nexus.name>
+        <nexus.name>Praeparatio Ultima</nexus.name>
         <nexus.type>experimental</nexus.type>
         <app.mainClass>com.zyneonstudios.apex.nexapp.Main</app.mainClass>
         <app.name>NEX App (Legacy)</app.name>
@@ -69,9 +69,9 @@
 
         <!-- NEROFY PUBLIC REPOSITORY -->
         <dependency>
-            <groupId>live.nerotv</groupId>
-            <artifactId>a-minecraft-launcher</artifactId>
-            <version>2025.12.6</version>
+            <groupId>com.zyneonstudios.nexus</groupId>
+            <artifactId>verget-all</artifactId>
+            <version>2024.8.2</version>
         </dependency>
         <dependency>
             <groupId>com.zyneonstudios.nexus</groupId>

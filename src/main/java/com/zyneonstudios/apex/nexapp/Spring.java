@@ -15,12 +15,12 @@ public class Spring {
      * @param args Command-line arguments passed to the application.
      */
     protected static void startWebServer(String[] args) {
-        Main.getLogger().deb("Initializing web server...");
+        Main.getLogger().log("Initializing springboot server...");
         if(OperatingSystem.getType().equals(OperatingSystem.Type.macOS)) {
             startWebServerAsync(args);
             return;
         }
-        Main.getLogger().deb("Initializing web server on Windows or Linux...");
+        Main.getLogger().deb("Initializing springboot server on \""+OperatingSystem.getName()+"-"+OperatingSystem.getVersion()+"-"+OperatingSystem.getArchitecture()+"\" ("+OperatingSystem.getType()+")...");
         if (Main.getPort() > 65535) {
             throw new RuntimeException("Port range exceeded, cannot launch application web server. Try to restart your computer or stopping port using applications and try again.");
         }
@@ -38,7 +38,7 @@ public class Spring {
     }
 
     private static void startWebServerAsync(String[] args) {
-        Main.getLogger().deb("Initializing web server on macOS...");
+        Main.getLogger().deb("Initializing springboot server async on \""+OperatingSystem.getName()+"-"+OperatingSystem.getVersion()+"-"+OperatingSystem.getArchitecture()+"\" ("+OperatingSystem.getType()+")...");
         if (Main.getPort() > 65535) {
             throw new RuntimeException("Port range exceeded...");
         }

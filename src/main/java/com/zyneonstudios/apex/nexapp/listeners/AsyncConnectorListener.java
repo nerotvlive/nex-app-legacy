@@ -5,7 +5,8 @@ import com.google.gson.JsonObject;
 import com.starxg.keytar.Keytar;
 import com.zyneonstudios.apex.nexapp.Main;
 import com.zyneonstudios.apex.nexapp.events.PageLoadedEvent;
-import com.zyneonstudios.apex.nexapp.launchprocess.hooks.MinecraftLauncherHook;
+import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftLauncherHook;
+import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftVersionUtils;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.fabric.FabricLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.forge.ForgeLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.neoforge.NeoForgeLauncher;
@@ -29,7 +30,6 @@ import com.zyneonstudios.nexus.utilities.file.FileActions;
 import com.zyneonstudios.verget.Verget;
 import com.zyneonstudios.verget.minecraft.MinecraftVerget;
 import jnafilechooser.api.JnaFileChooser;
-import live.nerotv.aminecraftlauncher.launcher.MinecraftVersion;
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.tag.CompoundTag;
@@ -776,7 +776,7 @@ public class AsyncConnectorListener {
                     String modloaderVersion;
                     if(instance.getModloader().equalsIgnoreCase("fabric")) {
                         modloaderVersion = instance.getFabricVersion();
-                        MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        MinecraftVersionUtils.Type type = MinecraftVersionUtils.getType(instance.getMinecraftVersion());
                         String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
                         Path path = Path.of(pathString);
                         if(type!=null) {
@@ -800,7 +800,7 @@ public class AsyncConnectorListener {
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
                     } else if(instance.getModloader().equalsIgnoreCase("forge")||instance.getForgeVersion()!=null) {
                         modloaderVersion = instance.getForgeVersion();
-                        MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        MinecraftVersionUtils.Type type = MinecraftVersionUtils.getType(instance.getMinecraftVersion());
                         String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
                         Path path = Path.of(pathString);
                         if(type!=null) {
@@ -824,7 +824,7 @@ public class AsyncConnectorListener {
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
                     } else if(instance.getModloader().equalsIgnoreCase("neoforge")) {
                         modloaderVersion = instance.getNeoForgeVersion();
-                        MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        MinecraftVersionUtils.Type type = MinecraftVersionUtils.getType(instance.getMinecraftVersion());
                         String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
                         Path path = Path.of(pathString);
                         if(type!=null) {
@@ -848,7 +848,7 @@ public class AsyncConnectorListener {
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
                     } else if(instance.getModloader().equalsIgnoreCase("quilt")) {
                         modloaderVersion = instance.getQuiltVersion();
-                        MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        MinecraftVersionUtils.Type type = MinecraftVersionUtils.getType(instance.getMinecraftVersion());
                         String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
                         Path path = Path.of(pathString);
                         if(type!=null) {
@@ -871,7 +871,7 @@ public class AsyncConnectorListener {
                         launcher.launch();
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
                     } else {
-                        MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        MinecraftVersionUtils.Type type = MinecraftVersionUtils.getType(instance.getMinecraftVersion());
                         String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
                         Path path = Path.of(pathString);
                         if(type!=null) {

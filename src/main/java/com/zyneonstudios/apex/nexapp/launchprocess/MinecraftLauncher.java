@@ -1,6 +1,5 @@
 package com.zyneonstudios.apex.nexapp.launchprocess;
 
-import com.zyneonstudios.apex.nexapp.launchprocess.hooks.MinecraftLauncherHook;
 import fr.flowarg.openlauncherlib.NoFramework;
 
 import java.io.File;

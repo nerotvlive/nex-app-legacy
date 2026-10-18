@@ -3,13 +3,13 @@ package com.zyneonstudios.apex.nexapp.launchprocess.vanilla;
 import com.zyneonstudios.apex.nexapp.Main;
 import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftInstaller;
 import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftLauncher;
-import com.zyneonstudios.apex.nexapp.launchprocess.hooks.MinecraftLauncherHook;
+import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftLauncherHook;
+import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftVersionUtils;
 import com.zyneonstudios.apex.nexapp.utilities.JavaUtilities;
 import com.zyneonstudios.nexus.utilities.system.OperatingSystem;
 import fr.flowarg.openlauncherlib.NoFramework;
 import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
 import fr.theshark34.openlauncherlib.minecraft.GameFolder;
-import live.nerotv.aminecraftlauncher.launcher.MinecraftVersion;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -272,7 +272,7 @@ public class VanillaLauncher implements MinecraftLauncher {
                         }
                     }
                 }
-                JavaUtilities.setJava(MinecraftVersion.getType(minecraftVersion));
+                JavaUtilities.setJava(MinecraftVersionUtils.getType(minecraftVersion));
                 try {
                     this.gameProcess = this.framework.launch(minecraftVersion, null, NoFramework.ModLoader.VANILLA);
                     this.postLaunchHook.run();

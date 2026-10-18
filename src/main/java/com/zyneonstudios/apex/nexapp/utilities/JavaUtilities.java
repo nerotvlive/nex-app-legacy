@@ -1,11 +1,11 @@
 package com.zyneonstudios.apex.nexapp.utilities;
 
+import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftVersionUtils;
+import com.zyneonstudios.apex.nexapp.main.NEXApplication;
 import com.zyneonstudios.nexus.utilities.system.OperatingSystem;
 import fr.flowarg.azuljavadownloader.*;
 import fr.theshark34.openlauncherlib.JavaUtil;
-import live.nerotv.aminecraftlauncher.launcher.MinecraftVersion;
 import org.apache.commons.io.FileUtils;
-import com.zyneonstudios.apex.nexapp.main.NEXApplication;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,11 +91,11 @@ public class JavaUtilities {
         return false;
     }
 
-    public static void setJava(MinecraftVersion.Type type) {
+    public static void setJava(MinecraftVersionUtils.Type type) {
         try {
             NEXApplication.getLogger().log("Detected Minecraft version type " + type + "!");
             String javaHome = System.getProperty("java.home");
-            if (type.equals(MinecraftVersion.Type.VERY_OLD)) {
+            if (type.equals(MinecraftVersionUtils.Type.VERY_OLD)) {
                 JavaUtil.setJavaCommand(null);
                 String java = NEXApplication.getInstance().getLocalSettings().getJava8Path();
                 if (!new File(java).exists()) {
@@ -103,7 +103,7 @@ public class JavaUtilities {
                     installJava("8", java);
                 }
                 javaHome = java;
-            } else if (type.equals(MinecraftVersion.Type.OLD)) {
+            } else if (type.equals(MinecraftVersionUtils.Type.OLD)) {
                 JavaUtil.setJavaCommand(null);
                 String java = NEXApplication.getInstance().getLocalSettings().getJava17Path();
                 if (!new File(java).exists()) {
@@ -111,7 +111,7 @@ public class JavaUtilities {
                     installJava("17", java);
                 }
                 javaHome = java;
-            } else if (type.equals(MinecraftVersion.Type.SEMI_NEW)) {
+            } else if (type.equals(MinecraftVersionUtils.Type.SEMI_NEW)) {
                 JavaUtil.setJavaCommand(null);
                 String java = NEXApplication.getInstance().getLocalSettings().getJava21Path();
                 if (!new File(java).exists()) {
@@ -119,7 +119,7 @@ public class JavaUtilities {
                     installJava("21", java);
                 }
                 javaHome = java;
-            } else if (type.equals(MinecraftVersion.Type.NEW)) {
+            } else if (type.equals(MinecraftVersionUtils.Type.NEW)) {
                 JavaUtil.setJavaCommand(null);
                 String java = NEXApplication.getInstance().getLocalSettings().getJava25Path();
                 if (!new File(java).exists()) {

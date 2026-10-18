@@ -1,6 +1,7 @@
 package com.zyneonstudios.apex.nexapp.launchprocess.modloaders.forge;
 
 import com.zyneonstudios.apex.nexapp.Main;
+import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftVersionUtils;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.ModloaderInstaller;
 import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaInstaller;
 import fr.flowarg.flowupdater.versions.forge.ForgeVersion;
@@ -84,7 +85,7 @@ public class ForgeInstaller extends VanillaInstaller implements ModloaderInstall
         try {
             if(forgeVersion == null) {
                 if(forgeBuilder == null) {
-                    forgeBuilder = new ForgeVersionBuilder().withForgeVersion(ForgeVersionPatches.forInstaller(modloaderVersion,getMinecraftVersion()));
+                    forgeBuilder = new ForgeVersionBuilder().withForgeVersion(MinecraftVersionUtils.forgeForInstaller(modloaderVersion,getMinecraftVersion()));
                 }
                 forgeVersion = forgeBuilder.build();
             }

@@ -75,28 +75,28 @@ public class  Main {
      */
     static void main(String[] args) {
         System.setProperty("java.awt.headless", "false");
+        logger.setName("NEX", true);
         NexusDesktop.init();
 
         ZyneonSplash splash = new ZyneonSplash();
         splash.setVisible(true);
+        // Resolve command-line arguments.
+        Main.args = args;
+        resolveArguments(args);
 
         loadVersion();
         checkExecutable();
 
-        checkMigrate();
-        checkAndUninstallNexus();
+        CompletableFuture.runAsync(() -> {
+            checkMigrate();
+            checkAndUninstallNexus();
+        });
 
         // Enforce single-instance execution with hung detection and focus.
         if (!ensureSingleInstance()) {
             splash.dispose();
             return;
         }
-
-        // Resolve command-line arguments.
-        Main.args = args;
-        resolveArguments(args);
-
-        logger.setName("NEX", true);
 
         if (!logger.isDebugging()) {
             if (!checkVersion()) {
@@ -234,9 +234,6 @@ public class  Main {
             appData = System.getProperty("user.home") + "/.local/share";
         }
         Path folderPath = Paths.get(appData, "Zyneon/NEXUS App");
-        if (!folderPath.toFile().exists()) {
-            folderPath = Paths.get(appData, "Zyneon/NEX App");
-        }
         try {
             Files.createDirectories(folderPath);
         } catch (Exception e) {

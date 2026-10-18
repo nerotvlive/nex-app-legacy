@@ -1,6 +1,5 @@
 package com.zyneonstudios.apex.nexapp.launchprocess;
 
-import com.zyneonstudios.apex.nexapp.launchprocess.hooks.MinecraftLauncherHook;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.ModloaderInstaller;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.ModloaderLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.fabric.FabricInstaller;

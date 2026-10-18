@@ -1,7 +1,6 @@
-package com.zyneonstudios.apex.nexapp.launchprocess.hooks;
+package com.zyneonstudios.apex.nexapp.launchprocess;
 
 import com.zyneonstudios.apex.nexapp.Main;
-import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftLauncher;
 import com.zyneonstudios.apex.nexapp.main.NEXApplication;
 import com.zyneonstudios.apex.nexapp.search.zyndex.local.LocalInstance;
 
