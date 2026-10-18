@@ -69,8 +69,8 @@ onMounted(async () => {
           </div>
           <div class="flex gap-2">
             <button @click="openExternal('https://apex.zyneonstudios.com')" class="flex gap-2 bg-zinc-500/25 hover:bg-zinc-400/25 text-white h-fit font-bold py-2 px-4 rounded transition shadow-lg shadow-black/25 hover:cursor-pointer"><i class="bi bi-globe"></i> Website</button>
-            <button @click="openExternal('https://discord.gg/hbHDrqUjJ8')" class="flex gap-2 bg-zinc-500/25 hover:bg-zinc-400/25 text-white h-fit font-bold py-2 px-4 rounded transition shadow-lg shadow-black/25 hover:cursor-pointer"><i class="bi bi-discord"></i> Discord</button>
-            <button @click="openExternal('https://github.com/nerotvlive/nex-app/tree/legacy')" class="flex gap-2 bg-zinc-500/25 hover:bg-zinc-400/25 text-white h-fit font-bold py-2 px-4 rounded transition shadow-lg shadow-black/25 hover:cursor-pointer"><i class="bi bi-github"></i> GitHub</button>
+            <button @click="openExternal('https://discord.gg/Q2AEWfesZW')" class="flex gap-2 bg-zinc-500/25 hover:bg-zinc-400/25 text-white h-fit font-bold py-2 px-4 rounded transition shadow-lg shadow-black/25 hover:cursor-pointer"><i class="bi bi-discord"></i> Discord</button>
+            <button @click="openExternal('https://github.com/nerotvlive/nex-app-legacy')" class="flex gap-2 bg-zinc-500/25 hover:bg-zinc-400/25 text-white h-fit font-bold py-2 px-4 rounded transition shadow-lg shadow-black/25 hover:cursor-pointer"><i class="bi bi-github"></i> GitHub</button>
           </div>
         </div>
         <div class="flex flex-col justify-between text-sm">
