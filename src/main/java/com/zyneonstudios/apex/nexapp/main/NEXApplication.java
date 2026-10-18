@@ -402,7 +402,6 @@ public class NEXApplication {
 
     private boolean launchFallbackFrame(String url) {
         try {
-            NexusDesktop.init();
             applicationFrame = new LegacyAppFrame(webSetup, url, true);
             applicationFrame.setVisible(true);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> CefApp.getInstance().dispose()));

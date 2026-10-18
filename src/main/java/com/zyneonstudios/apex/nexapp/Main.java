@@ -6,6 +6,7 @@ import com.zyneonstudios.apex.nexapp.frame.ZyneonSplash;
 import com.zyneonstudios.apex.nexapp.main.NEXApplication;
 import com.zyneonstudios.apex.nexapp.utilities.ApplicationLogger;
 import com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence;
+import com.zyneonstudios.nexus.desktop.NexusDesktop;
 import com.zyneonstudios.nexus.utilities.file.FileGetter;
 import com.zyneonstudios.nexus.utilities.json.GsonUtility;
 import com.zyneonstudios.nexus.utilities.strings.StringGenerator;
@@ -72,8 +73,9 @@ public class  Main {
      *
      * @param args Command-line arguments passed to the application.
      */
-    public static void main(String[] args) {
+    static void main(String[] args) {
         System.setProperty("java.awt.headless", "false");
+        NexusDesktop.init();
 
         ZyneonSplash splash = new ZyneonSplash();
         splash.setVisible(true);
