@@ -2,7 +2,7 @@ package com.zyneonstudios.apex.nexapp;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.zyneonstudios.apex.nexapp.frame.ZyneonSplash;
+import com.zyneonstudios.apex.nexapp.frame.LegacyZyneonSplash;
 import com.zyneonstudios.apex.nexapp.main.NEXApplication;
 import com.zyneonstudios.apex.nexapp.utilities.ApplicationLogger;
 import com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence;
@@ -78,7 +78,7 @@ public class  Main {
         logger.setName("NEX", true);
         NexusDesktop.init();
 
-        ZyneonSplash splash = new ZyneonSplash();
+        LegacyZyneonSplash splash = new LegacyZyneonSplash();
         splash.setVisible(true);
         // Resolve command-line arguments.
         Main.args = args;

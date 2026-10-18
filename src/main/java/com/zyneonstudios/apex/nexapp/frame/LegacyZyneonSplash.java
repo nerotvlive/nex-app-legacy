@@ -10,13 +10,13 @@ import java.util.Objects;
  * The {@code ZyneonSplash} class represents the splash screen displayed during the application's startup.
  * It shows a logo image while the application is initializing.
  */
-public class ZyneonSplash extends JWindow {
+public class LegacyZyneonSplash extends JWindow {
 
     /**
      * Constructor for the ZyneonSplash.
      * Initializes the splash screen window with the logo image.
      */
-    public ZyneonSplash() {
+    public LegacyZyneonSplash() {
         super();
         try {
             // Set the background to transparent.

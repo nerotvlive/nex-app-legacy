@@ -10,13 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-public class NativeAppFrame implements AppFrame {
+public class WebviewAppFrame implements AppFrame {
 
     private final AsyncConnectorListener connectorListener;
     private Webview webview;
     private String url;
 
-    public NativeAppFrame(String url) throws Exception {
+    public WebviewAppFrame(String url) throws Exception {
         try {
             this.url = url;
             Thread.ofPlatform().start(() -> {

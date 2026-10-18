@@ -1,6 +1,7 @@
 package com.zyneonstudios.apex.nexapp.frame;
 
 import com.zyneonstudios.nexus.desktop.events.AsyncWebFrameConnectorEvent;
+import com.zyneonstudios.nexus.desktop.frame.nexus.NexusWebFrame;
 import com.zyneonstudios.nexus.desktop.frame.web.NexusWebSetup;
 import com.zyneonstudios.nexus.desktop.frame.web.WebFrame;
 import com.zyneonstudios.nexus.utilities.strings.StringGenerator;
@@ -35,9 +36,6 @@ public class LegacyAppFrame extends NexusWebFrame implements ComponentListener, 
 
     /** A unique identifier for this window instance, used for distinguishing between multiple windows. */
     private final String windowId = StringGenerator.generateAlphanumericString(12);
-
-    /** The SmartBar component, which may display context-sensitive information or controls. */
-    private SmartBar smartBar;
 
     /** The "Actions" menu in the menu bar. */
     private final JMenu actions = new JMenu("Actions");
@@ -229,12 +227,7 @@ public class LegacyAppFrame extends NexusWebFrame implements ComponentListener, 
         menuBar.add(browser);
         menuBar.add(actions);
         menuBar.setBorder(null);
-        
-        // Initialize and add the SmartBar.
-        smartBar = new SmartBar();
-        smartBar.setMargin(0, 3, 0, 6);
-        smartBar.setMaximumSize(new Dimension(250, getSize().height));
-        //menuBar.add(smartBar);
+
         menuBar.setOpaque(true);
 
         // Attach the menu bar to the native frame or custom title bar.
@@ -486,9 +479,6 @@ public class LegacyAppFrame extends NexusWebFrame implements ComponentListener, 
         menuBar.setBackground(color);
         actions.getPopupMenu().setBackground(color);
         browser.getPopupMenu().setBackground(color);
-        try {
-            smartBar.setSpaceColor(color);
-        } catch (Exception ignore) {}
     }
 
     /**
@@ -659,24 +649,6 @@ public class LegacyAppFrame extends NexusWebFrame implements ComponentListener, 
     @Override
     public void componentHidden(ComponentEvent e) {
         // Not implemented.
-    }
-
-    /**
-     * Returns the {@link SmartBar} associated with this frame.
-     *
-     * @return The {@code SmartBar} instance.
-     */
-    public SmartBar getSmartBar() {
-        return smartBar;
-    }
-
-    /**
-     * Sets the {@link SmartBar} for this frame.
-     *
-     * @param smartBar The {@code SmartBar} to associate with this frame.
-     */
-    public void setSmartBar(SmartBar smartBar) {
-        this.smartBar = smartBar;
     }
 
     public double getScaleFactor() {

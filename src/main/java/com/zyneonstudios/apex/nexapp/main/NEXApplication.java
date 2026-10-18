@@ -7,7 +7,7 @@ import com.zyneonstudios.apex.nexapp.Main;
 import com.zyneonstudios.apex.nexapp.downloads.DownloadManager;
 import com.zyneonstudios.apex.nexapp.frame.AppFrame;
 import com.zyneonstudios.apex.nexapp.frame.LegacyAppFrame;
-import com.zyneonstudios.apex.nexapp.frame.NativeAppFrame;
+import com.zyneonstudios.apex.nexapp.frame.WebviewAppFrame;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.fabric.FabricLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.forge.ForgeLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.neoforge.NeoForgeLauncher;
@@ -400,7 +400,7 @@ public class NEXApplication {
 
     private boolean launchNativeFrame(String url) {
         try {
-            applicationFrame = new NativeAppFrame(url);
+            applicationFrame = new WebviewAppFrame(url);
             return true;
         } catch (Exception e) {
             getLogger().err("Failed to use native frame: " + e.getMessage());
