@@ -5,6 +5,7 @@ import Dashboard from "@/pages/Dashboard.vue";
 import NotFound from "@/pages/errors/NotFound.vue";
 import Settings from "@/pages/Settings.vue";
 import Discover from "@/pages/Discover.vue";
+import Index from "@/pages/Index.vue";
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -15,6 +16,12 @@ declare module 'vue-router' {
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    name: 'Index',
+    meta: { title: 'Start' },
+    component: Index
+  },
+  {
+    path: '/dashboard',
     name: 'Dashboard',
     meta: { title: 'Dashboard' },
     component: Dashboard

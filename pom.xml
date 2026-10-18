@@ -12,7 +12,7 @@
         <maven.compiler.source>25</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <nexus.name>Praeparatio Ultima</nexus.name>
-        <nexus.type>experimental</nexus.type>
+        <nexus.type>stable</nexus.type>
         <app.mainClass>com.zyneonstudios.apex.nexapp.Main</app.mainClass>
         <app.name>NEX App (Legacy)</app.name>
         <app.vendor>Zyneon Apex</app.vendor>

@@ -11,6 +11,12 @@
     --zyn-bg-item-alt: var(--color-zinc-800);
     --zyn-bg-item-accent: var(--color-zinc-600);
 
+    --zyn-acc: #753ffe;
+    --zyn-acc-alt: #8a5cff;
+    --zyn-acc-item: #7e4bff;
+    --zyn-acc-item-alt: #8a5cff;
+    --zyn-acc-item-accent: #966cff;
+
     font: 18px/145% var(--sans);
     letter-spacing: 0.18px;
     font-synthesis: none;

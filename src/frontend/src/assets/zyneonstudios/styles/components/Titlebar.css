@@ -1,13 +1,23 @@
 .titlebar {
+    min-height: 40px;
+    max-height: 40px;
+    height: 40px;
 
     button {
-        height: 2rem;
-        width: 2rem;
+        min-height: 40px;
+        min-width: 40px;
+        max-height: 40px;
+        max-width: 40px;
+        height: 40px;
+        width: 40px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     button:hover {
         background-color: #ffffff25;
-        cursor: pointer;
     }
 
     button.close:hover {

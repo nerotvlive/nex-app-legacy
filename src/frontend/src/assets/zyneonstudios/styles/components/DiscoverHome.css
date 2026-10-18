@@ -1,5 +1,5 @@
 .discover-view {
-    background: url("@/assets/zyneonstudios/images/placeholder.jpg");
+    background: linear-gradient(to bottom, #373737, #261737);;
     background-size: cover;
 
     .seperator {

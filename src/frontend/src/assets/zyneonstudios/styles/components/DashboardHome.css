@@ -1,5 +1,5 @@
 .dashboard-view {
-    background: url("@/assets/zyneonstudios/images/background.jpg");
+    background: linear-gradient(to bottom, black, #28074e);
     background-size: cover;
 
     .seperator {

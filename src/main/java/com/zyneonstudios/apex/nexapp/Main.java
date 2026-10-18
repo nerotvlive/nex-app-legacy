@@ -135,16 +135,14 @@ public class  Main {
      * Loads the application version from the nexus.json file.
      */
     private static void loadVersion() {
-        if (!getLogger().isDebugging()) {
-            try {
-                String data = new String(Thread.currentThread().getContextClassLoader().getResourceAsStream("nexus.json").readAllBytes());
-                JsonObject nexus = new Gson().fromJson(data, JsonObject.class);
-                version = nexus.get("version").getAsString();
-                versionType = nexus.get("type").getAsString();
-                versionName = nexus.get("name").getAsString();
-            } catch (Exception e) {
-                getLogger().err("Couldn't fetch version from nexus.json: " + e.getMessage());
-            }
+        try {
+            String data = new String(Thread.currentThread().getContextClassLoader().getResourceAsStream("nexus.json").readAllBytes());
+            JsonObject nexus = new Gson().fromJson(data, JsonObject.class);
+            version = nexus.get("version").getAsString();
+            versionType = nexus.get("type").getAsString();
+            versionName = nexus.get("name").getAsString();
+        } catch (Exception e) {
+            getLogger().err("Couldn't fetch version from nexus.json: " + e.getMessage());
         }
     }
 

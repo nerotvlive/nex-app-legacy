@@ -58,8 +58,8 @@ div.mainMenu {
     }
 
     button.active ,a.active {
-        background: var(--color-blue-600);
-        box-shadow: 0 0 0.667rem var(--color-blue-600);
+        background: var(--zyn-acc);
+        box-shadow: 0 0 0.667rem var(--zyn-acc-alt);
 
         i {
             color: white;
@@ -88,7 +88,6 @@ div.mainMenu.active {
     }
 
     button.active ,a.active {
-        background: var(--color-blue-600);
         color: white;
     }
 }

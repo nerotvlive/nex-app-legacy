@@ -54,7 +54,7 @@ onMounted(async () => {
           <i class="bi bi-dash-lg"></i>
         </button>
         <button @click="maximizeApp()" @mousedown.stop>
-          <i class="bi bi-fullscreen"></i>
+          <i class="bi bi-app"></i>
         </button>
         <button class="close" @click="closeApp" @mousedown.stop>
           <i class="bi bi-x-lg"></i>
