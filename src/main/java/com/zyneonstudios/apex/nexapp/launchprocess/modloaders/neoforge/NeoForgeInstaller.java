@@ -1,7 +1,7 @@
 package com.zyneonstudios.apex.nexapp.launchprocess.modloaders.neoforge;
 
 import com.zyneonstudios.apex.nexapp.Main;
-import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftInstaller;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.ModloaderInstaller;
 import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaInstaller;
 import fr.flowarg.flowupdater.versions.neoforge.NeoForgeVersion;
 import fr.flowarg.flowupdater.versions.neoforge.NeoForgeVersionBuilder;
@@ -9,7 +9,7 @@ import fr.flowarg.flowupdater.versions.neoforge.NeoForgeVersionBuilder;
 import java.io.File;
 import java.nio.file.Path;
 
-public class NeoForgeInstaller extends VanillaInstaller implements MinecraftInstaller {
+public class NeoForgeInstaller extends VanillaInstaller implements ModloaderInstaller {
 
     private NeoForgeVersionBuilder neoforgeBuilder;
     private NeoForgeVersion neoforgeVersion;
@@ -35,6 +35,7 @@ public class NeoForgeInstaller extends VanillaInstaller implements MinecraftInst
         return neoforgeVersion;
     }
 
+    @Override
     public String getModloaderVersion() {
         return modloaderVersion;
     }
@@ -49,6 +50,7 @@ public class NeoForgeInstaller extends VanillaInstaller implements MinecraftInst
         return this;
     }
 
+    @Override
     public NeoForgeInstaller withModloaderVersion(String modloaderVersion) {
         this.modloaderVersion = modloaderVersion;
         return this;
@@ -61,8 +63,8 @@ public class NeoForgeInstaller extends VanillaInstaller implements MinecraftInst
             if (vanillaInstall) {
                 if(verify()) {
                     try {
-                        withInstaller(getBuilder().withModLoaderVersion(neoforgeVersion).build());
-                        getInstaller().update(getPath());
+                        withUpdater(getBuilder().withModLoaderVersion(neoforgeVersion).build());
+                        getUpdater().update(getPath());
                         return true;
                     } catch (Exception e) {
                         Main.getLogger().err("[NeoForge Installer] Failed to install neoforge version ("+neoforgeVersion+") with vanilla version ("+getMinecraftVersion()+") at path ("+getPathString()+") with error: "+e.getMessage());

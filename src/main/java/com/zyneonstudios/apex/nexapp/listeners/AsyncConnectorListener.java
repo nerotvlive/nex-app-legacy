@@ -5,7 +5,12 @@ import com.google.gson.JsonObject;
 import com.starxg.keytar.Keytar;
 import com.zyneonstudios.apex.nexapp.Main;
 import com.zyneonstudios.apex.nexapp.events.PageLoadedEvent;
-import com.zyneonstudios.apex.nexapp.launchprocess.hooks.GameHooks;
+import com.zyneonstudios.apex.nexapp.launchprocess.hooks.MinecraftLauncherHook;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.fabric.FabricLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.forge.ForgeLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.neoforge.NeoForgeLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.quilt.QuiltLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaLauncher;
 import com.zyneonstudios.apex.nexapp.main.NEXApplication;
 import com.zyneonstudios.apex.nexapp.search.CombinedSearch;
 import com.zyneonstudios.apex.nexapp.search.curseforge.CurseForgeIntegration;
@@ -24,7 +29,7 @@ import com.zyneonstudios.nexus.utilities.file.FileActions;
 import com.zyneonstudios.verget.Verget;
 import com.zyneonstudios.verget.minecraft.MinecraftVerget;
 import jnafilechooser.api.JnaFileChooser;
-import live.nerotv.aminecraftlauncher.launcher.*;
+import live.nerotv.aminecraftlauncher.launcher.MinecraftVersion;
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.tag.CompoundTag;
@@ -52,7 +57,9 @@ public class AsyncConnectorListener {
         NEXApplication.getLogger().deb("[CONNECTOR] Resolving "+s);
         NEXApplication.getInstance().getApplicationFrame().executeJavaScript("getUrl(window.location.href);");
         NEXApplication.getInstance().getApplicationFrame().executeJavaScript("nativeApp = "+!(Main.useFallbackFrame()||NEXApplication.getInstance().getLocalSettings().useFallbackWindow())+";");
-        if (s.equals("download.pauseRunning")) {
+        if(s.equals("titlebar.version")) {
+            NEXApplication.getInstance().getApplicationFrame().executeJavaScript("document.getElementById('nexapp-titlebar-version').innerText = '("+NEXApplication.getInstance().getVersion()+")';");
+        } else if (s.equals("download.pauseRunning")) {
             NEXApplication.getInstance().getDownloadManager().getDownloads().get(NEXApplication.getInstance().getRunner().getDownloadingId()).pause();
         } else if (s.equals("download.cancelRunning")) {
             NEXApplication.getInstance().getDownloadManager().getDownloads().get(NEXApplication.getInstance().getRunner().getDownloadingId()).cancel();
@@ -564,10 +571,14 @@ public class AsyncConnectorListener {
             NEXApplication.getInstance().getApplicationFrame().executeJavaScript("document.querySelector('.privacy-enableDiscordRPC').checked = "+rpc+";");
         } else if(s.startsWith("discordrpc.")) {
             if (s.replace("discordrpc.", "").equals("true")) {
-                DiscordRichPresence.startRPC();
+                try {
+                    com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence.startRPC();
+                } catch (Exception ignore) {}
                 NEXApplication.getInstance().getSettings().set("settings.discord.rpc", true);
             } else {
-                DiscordRichPresence.stopRPC();
+                try {
+                    com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence.stopRPC();
+                } catch (Exception ignore) {}
                 NEXApplication.getInstance().getSettings().set("settings.discord.rpc", false);
             }
         } else if(s.startsWith("hideApp.")) {
@@ -675,8 +686,7 @@ public class AsyncConnectorListener {
                     switch (s) {
                         case "experimental" -> versions.addAll(Verget.getMinecraftVersions(MinecraftVerget.Filter.EXPERIMENTAL));
                         case "fabric" -> versions.addAll(Verget.getFabricGameVersions(true));
-                        case "forge" -> versions.addAll(Verget.getForgeGameVersions());
-                        case "neoforge" -> versions.addAll(Verget.getNeoForgeGameVersions());
+                        case "forge", "neoforge" -> versions.addAll(Verget.getForgeGameVersions());
                         case "quilt" -> versions.addAll(Verget.getQuiltGameVersions(true));
                         default -> versions.addAll(Verget.getMinecraftVersions(MinecraftVerget.Filter.RELEASES));
                     }
@@ -767,91 +777,120 @@ public class AsyncConnectorListener {
                     if(instance.getModloader().equalsIgnoreCase("fabric")) {
                         modloaderVersion = instance.getFabricVersion();
                         MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
+                        Path path = Path.of(pathString);
                         if(type!=null) {
                             JavaUtilities.setJava(type);
                         }
-                        FabricLauncher launcher = NEXApplication.getInstance().getFabricLauncher();
-                        launcher.setPreLaunchHook(GameHooks.getPreLaunchHook(launcher,lI));
-                        launcher.setPostLaunchHook(GameHooks.getPostLaunchHook(launcher,lI));
-                        launcher.setGameCloseHook(GameHooks.getGameCloseHook(launcher,lI));
+                        FabricLauncher launcher = NEXApplication.getInstance().getFabricLauncher(pathString);
+                        launcher.withMinecraftVersion(mc);
+                        launcher.withModloaderVersion(modloaderVersion);
+                        launcher.withPreLaunchHook(MinecraftLauncherHook.getInstancePreLaunchHook(launcher,lI));
+                        launcher.withPostLaunchHook(MinecraftLauncherHook.getInstancePostLaunchHook(launcher,lI));
+                        launcher.withPostCloseHook(MinecraftLauncherHook.getInstanceGameCloseHook(launcher,lI));
 
                         if(lI.isFullscreen()) {
-                            launcher.addAdditionalEnvironmentalArgs("--fullscreen");
+                            launcher.withArgs("--fullscreen");
                         }
-                        launcher.addAdditionalEnvironmentalArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withEnvArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withMinMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
+                        launcher.withMaxMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
 
-                        launcher.launch(mc, modloaderVersion, NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory(), Path.of(NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath()), instance.getId());
+                        launcher.launch();
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
-                    } else if(instance.getModloader().equalsIgnoreCase("forge")) {
+                    } else if(instance.getModloader().equalsIgnoreCase("forge")||instance.getForgeVersion()!=null) {
                         modloaderVersion = instance.getForgeVersion();
                         MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
+                        Path path = Path.of(pathString);
                         if(type!=null) {
                             JavaUtilities.setJava(type);
                         }
-                        ForgeLauncher launcher = NEXApplication.getInstance().getForgeLauncher();
-                        launcher.setPreLaunchHook(GameHooks.getPreLaunchHook(launcher,lI));
-                        launcher.setPostLaunchHook(GameHooks.getPostLaunchHook(launcher,lI));
-                        launcher.setGameCloseHook(GameHooks.getGameCloseHook(launcher,lI));
+                        ForgeLauncher launcher = NEXApplication.getInstance().getForgeLauncher(pathString);
+                        launcher.withMinecraftVersion(mc);
+                        launcher.withModloaderVersion(modloaderVersion);
+                        launcher.withPreLaunchHook(MinecraftLauncherHook.getInstancePreLaunchHook(launcher,lI));
+                        launcher.withPostLaunchHook(MinecraftLauncherHook.getInstancePostLaunchHook(launcher,lI));
+                        launcher.withPostCloseHook(MinecraftLauncherHook.getInstanceGameCloseHook(launcher,lI));
 
                         if(lI.isFullscreen()) {
-                            launcher.addAdditionalEnvironmentalArgs("--fullscreen");
+                            launcher.withArgs("--fullscreen");
                         }
-                        launcher.addAdditionalEnvironmentalArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withEnvArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withMinMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
+                        launcher.withMaxMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
 
-                        launcher.launch(mc,modloaderVersion, NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory(), Path.of(NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath()),instance.getId());
+                        launcher.launch();
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
                     } else if(instance.getModloader().equalsIgnoreCase("neoforge")) {
                         modloaderVersion = instance.getNeoForgeVersion();
                         MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
+                        Path path = Path.of(pathString);
                         if(type!=null) {
                             JavaUtilities.setJava(type);
                         }
-                        NeoForgeLauncher launcher = NEXApplication.getInstance().getNeoForgeLauncher();
-                        launcher.setPreLaunchHook(GameHooks.getPreLaunchHook(launcher,lI));
-                        launcher.setPostLaunchHook(GameHooks.getPostLaunchHook(launcher,lI));
-                        launcher.setGameCloseHook(GameHooks.getGameCloseHook(launcher,lI));
+                        NeoForgeLauncher launcher = NEXApplication.getInstance().getNeoForgeLauncher(pathString);
+                        launcher.withMinecraftVersion(mc);
+                        launcher.withModloaderVersion(modloaderVersion);
+                        launcher.withPreLaunchHook(MinecraftLauncherHook.getInstancePreLaunchHook(launcher,lI));
+                        launcher.withPostLaunchHook(MinecraftLauncherHook.getInstancePostLaunchHook(launcher,lI));
+                        launcher.withPostCloseHook(MinecraftLauncherHook.getInstanceGameCloseHook(launcher,lI));
 
                         if(lI.isFullscreen()) {
-                            launcher.addAdditionalEnvironmentalArgs("--fullscreen");
+                            launcher.withArgs("--fullscreen");
                         }
-                        launcher.addAdditionalEnvironmentalArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withEnvArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withMinMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
+                        launcher.withMaxMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
 
-                        launcher.launch(mc, modloaderVersion, NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory(), Path.of(NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath()), instance.getId());
+                        launcher.launch();
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
                     } else if(instance.getModloader().equalsIgnoreCase("quilt")) {
                         modloaderVersion = instance.getQuiltVersion();
                         MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
+                        Path path = Path.of(pathString);
                         if(type!=null) {
                             JavaUtilities.setJava(type);
                         }
-                        QuiltLauncher launcher = NEXApplication.getInstance().getQuiltLauncher();
-                        launcher.setPreLaunchHook(GameHooks.getPreLaunchHook(launcher,lI));
-                        launcher.setPostLaunchHook(GameHooks.getPostLaunchHook(launcher,lI));
-                        launcher.setGameCloseHook(GameHooks.getGameCloseHook(launcher,lI));
+                        QuiltLauncher launcher = NEXApplication.getInstance().getQuiltLauncher(pathString);
+                        launcher.withMinecraftVersion(mc);
+                        launcher.withModloaderVersion(modloaderVersion);
+                        launcher.withPreLaunchHook(MinecraftLauncherHook.getInstancePreLaunchHook(launcher,lI));
+                        launcher.withPostLaunchHook(MinecraftLauncherHook.getInstancePostLaunchHook(launcher,lI));
+                        launcher.withPostCloseHook(MinecraftLauncherHook.getInstanceGameCloseHook(launcher,lI));
 
                         if(lI.isFullscreen()) {
-                            launcher.addAdditionalEnvironmentalArgs("--fullscreen");
+                            launcher.withArgs("--fullscreen");
                         }
-                        launcher.addAdditionalEnvironmentalArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withEnvArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withMinMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
+                        launcher.withMaxMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
 
-                        launcher.launch(mc, modloaderVersion, NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory(), Path.of(NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath()), instance.getId());
+                        launcher.launch();
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
                     } else {
-                        VanillaLauncher launcher = NEXApplication.getInstance().getVanillaLauncher();
                         MinecraftVersion.Type type = MinecraftVersion.getType(instance.getMinecraftVersion());
+                        String pathString = NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath();
+                        Path path = Path.of(pathString);
                         if(type!=null) {
                             JavaUtilities.setJava(type);
                         }
-                        launcher.setPreLaunchHook(GameHooks.getPreLaunchHook(launcher,lI));
-                        launcher.setPostLaunchHook(GameHooks.getPostLaunchHook(launcher,lI));
-                        launcher.setGameCloseHook(GameHooks.getGameCloseHook(launcher,lI));
+                        VanillaLauncher launcher = NEXApplication.getInstance().getVanillaLauncher(pathString);
+                        launcher.withMinecraftVersion(mc);
+                        launcher.withPreLaunchHook(MinecraftLauncherHook.getInstancePreLaunchHook(launcher,lI));
+                        launcher.withPostLaunchHook(MinecraftLauncherHook.getInstancePostLaunchHook(launcher,lI));
+                        launcher.withPostCloseHook(MinecraftLauncherHook.getInstanceGameCloseHook(launcher,lI));
 
                         if(lI.isFullscreen()) {
-                            launcher.addAdditionalEnvironmentalArgs("--fullscreen");
+                            launcher.withArgs("--fullscreen");
                         }
-                        launcher.addAdditionalEnvironmentalArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withEnvArgs("--width",lI.getWidth()+"","--height",lI.getHeight()+"");
+                        launcher.withMinMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
+                        launcher.withMaxMemory(NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory());
 
-                        launcher.launch(mc, NEXApplication.getInstance().getLocalSettings().getDefaultMinecraftMemory(), Path.of(NEXApplication.getInstance().getInstanceManager().getInstance(id).getPath()), instance.getId());
+                        launcher.launch();
                         NEXApplication.getInstance().getInstanceManager().addRunningInstance(launcher.getGameProcess(), id);
                     }
                 }

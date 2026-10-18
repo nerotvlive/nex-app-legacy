@@ -1,7 +1,7 @@
 package com.zyneonstudios.apex.nexapp.launchprocess.modloaders.forge;
 
 import com.zyneonstudios.apex.nexapp.Main;
-import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftInstaller;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.ModloaderInstaller;
 import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaInstaller;
 import fr.flowarg.flowupdater.versions.forge.ForgeVersion;
 import fr.flowarg.flowupdater.versions.forge.ForgeVersionBuilder;
@@ -9,7 +9,7 @@ import fr.flowarg.flowupdater.versions.forge.ForgeVersionBuilder;
 import java.io.File;
 import java.nio.file.Path;
 
-public class ForgeInstaller extends VanillaInstaller implements MinecraftInstaller {
+public class ForgeInstaller extends VanillaInstaller implements ModloaderInstaller {
 
     private ForgeVersionBuilder forgeBuilder;
     private ForgeVersion forgeVersion;
@@ -35,6 +35,7 @@ public class ForgeInstaller extends VanillaInstaller implements MinecraftInstall
         return forgeVersion;
     }
 
+    @Override
     public String getModloaderVersion() {
         return modloaderVersion;
     }
@@ -49,6 +50,7 @@ public class ForgeInstaller extends VanillaInstaller implements MinecraftInstall
         return this;
     }
 
+    @Override
     public ForgeInstaller withModloaderVersion(String modloaderVersion) {
         this.modloaderVersion = modloaderVersion;
         return this;
@@ -61,11 +63,12 @@ public class ForgeInstaller extends VanillaInstaller implements MinecraftInstall
             if (vanillaInstall) {
                 if(verify()) {
                     try {
-                        withInstaller(getBuilder().withModLoaderVersion(forgeVersion).build());
-                        getInstaller().update(getPath());
+                        withUpdater(getBuilder().withModLoaderVersion(forgeVersion).build());
+                        getUpdater().update(getPath());
                         return true;
                     } catch (Exception e) {
                         Main.getLogger().err("[Forge Installer] Failed to install forge version ("+forgeVersion+") with vanilla version ("+getMinecraftVersion()+") at path ("+getPathString()+") with error: "+e.getMessage());
+                        e.printStackTrace();
                     }
                 }
             } else {
@@ -81,13 +84,14 @@ public class ForgeInstaller extends VanillaInstaller implements MinecraftInstall
         try {
             if(forgeVersion == null) {
                 if(forgeBuilder == null) {
-                    forgeBuilder = new ForgeVersionBuilder().withForgeVersion(modloaderVersion);
+                    forgeBuilder = new ForgeVersionBuilder().withForgeVersion(ForgeVersionPatches.forInstaller(modloaderVersion,getMinecraftVersion()));
                 }
                 forgeVersion = forgeBuilder.build();
             }
             return true;
         } catch (Exception e) {
             Main.getLogger().err("[Forge Installer] Failed to build & verify forge installer. [path: \""+getPathString()+"\", vanilla: \""+getMinecraftVersion()+"\", forge: \""+forgeVersion+"\", error: \""+e.getMessage()+"\"]");
+            e.printStackTrace();
         }
         return false;
     }

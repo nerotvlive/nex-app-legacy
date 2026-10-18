@@ -95,7 +95,7 @@
         <!-- Title bar -->
         <div id="nexapp-titlebar" style="min-height: 40px; max-height: 40px; height: 40px; overflow: hidden;" class="d-flex justify-content-between">
             <div class="title p-1">
-                <span style="font-size: 1.2rem; margin-left: 0.5rem;"><strong>NEX </strong>App</span>
+                <span style="font-size: 1.2rem; margin-left: 0.5rem;"><strong>NEX </strong>App <span class="opacity-50" id="nexapp-titlebar-version"></span></span>
             </div>
             <div class="d-flex buttons">
                 <button onclick="window.minimizeWindow();">
@@ -203,6 +203,7 @@
                     });
                 }
             });
+            connector("titlebar.version");
         </script>
     </body>
 </html>

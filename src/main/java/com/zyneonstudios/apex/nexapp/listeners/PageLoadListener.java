@@ -1,6 +1,5 @@
 package com.zyneonstudios.apex.nexapp.listeners;
 
-import com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence;
 import com.zyneonstudios.apex.nexapp.utilities.MicrosoftAuthenticator;
 import com.zyneonstudios.apex.nexapp.events.PageLoadedEvent;
 import com.zyneonstudios.apex.nexapp.main.NEXApplication;
@@ -30,23 +29,29 @@ public class PageLoadListener extends PageLoadedEvent {
                     NEXApplication.getInstance().getApplicationFrame().executeJavaScript("loadPage('login.html');");
                 }
 
-            DiscordRichPresence.setDetails("Looking at their library...");
+            setPresenceDetails("Looking at their library...");
         }
         if(getUrl().toLowerCase().contains("page=login")) {
             if(MicrosoftAuthenticator.isLoggedIn()) {
                 NEXApplication.getInstance().getApplicationFrame().executeJavaScript("loadPage('library.html');");
             }
-            DiscordRichPresence.setDetails("Looking at their library...");
+            setPresenceDetails("Looking at their library...");
         }
         if(getUrl().toLowerCase().contains("page=discover")) {
-            DiscordRichPresence.setDetails("Exploring resources...");
+            setPresenceDetails("Exploring resources...");
         }
         if(getUrl().toLowerCase().contains("page=settings")) {
-            DiscordRichPresence.setDetails("Customizing their settings...");
+            setPresenceDetails("Customizing their settings...");
         }
         if(getUrl().toLowerCase().contains("page=downloads")) {
-            DiscordRichPresence.setDetails("Looking at downloads...");
+            setPresenceDetails("Looking at downloads...");
         }
         return true;
+    }
+
+    private void setPresenceDetails(String details) {
+        try {
+            com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence.setDetails(details);
+        } catch (Exception ignore) {}
     }
 }

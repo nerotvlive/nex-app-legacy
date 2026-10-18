@@ -1,5 +1,6 @@
 package com.zyneonstudios.apex.nexapp.launchprocess;
 
+import com.zyneonstudios.apex.nexapp.launchprocess.hooks.MinecraftLauncherHook;
 import fr.flowarg.openlauncherlib.NoFramework;
 
 import java.io.File;
@@ -19,6 +20,9 @@ public interface MinecraftLauncher {
     boolean isRunning();
     Process getGameProcess();
     NoFramework getFramework();
+    MinecraftLauncherHook getPreLaunchHook();
+    MinecraftLauncherHook getPostLaunchHook();
+    MinecraftLauncherHook getPostCloseHook();
     MinecraftLauncher withInstaller(MinecraftInstaller installer);
     MinecraftLauncher withPath(File file);
     MinecraftLauncher withPath(Path path);
@@ -29,5 +33,8 @@ public interface MinecraftLauncher {
     MinecraftLauncher withFramework(NoFramework framework);
     MinecraftLauncher withMinMemory(int minMemory);
     MinecraftLauncher withMaxMemory(int maxMemory);
+    MinecraftLauncher withPreLaunchHook(MinecraftLauncherHook preLaunchHook);
+    MinecraftLauncher withPostLaunchHook(MinecraftLauncherHook postLaunchHook);
+    MinecraftLauncher withPostCloseHook(MinecraftLauncherHook postCloseHook);
     boolean launch();
 }

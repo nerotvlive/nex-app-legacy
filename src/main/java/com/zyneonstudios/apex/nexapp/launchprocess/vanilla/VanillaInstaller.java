@@ -15,7 +15,7 @@ public class VanillaInstaller implements MinecraftInstaller {
     private FlowUpdater.FlowUpdaterBuilder builder;
     private VanillaVersion.VanillaVersionBuilder vanillaBuilder;
 
-    private FlowUpdater installer;
+    private FlowUpdater updater;
     private VanillaVersion vanillaVersion;
 
     private String minecraftVersion;
@@ -94,8 +94,8 @@ public class VanillaInstaller implements MinecraftInstaller {
     }
 
     @Override
-    public FlowUpdater getInstaller() {
-        return installer;
+    public FlowUpdater getUpdater() {
+        return updater;
     }
 
     @Override
@@ -141,8 +141,8 @@ public class VanillaInstaller implements MinecraftInstaller {
     }
 
     @Override
-    public VanillaInstaller withInstaller(FlowUpdater installer) {
-        this.installer = installer;
+    public VanillaInstaller withUpdater(FlowUpdater installer) {
+        this.updater = installer;
         return this;
     }
 
@@ -163,7 +163,7 @@ public class VanillaInstaller implements MinecraftInstaller {
         if(minecraftVersion!=null&&!minecraftVersion.isBlank()&&pathString!=null&&!pathString.isBlank()) {
             if(verify()) {
                 try {
-                    installer.update(path);
+                    updater.update(path);
                     return true;
                 } catch (Exception e) {
                     Main.getLogger().err("[Vanilla Installer] Failed to install vanilla version ("+minecraftVersion+") at path ("+pathString+") with error: "+e.getMessage());
@@ -177,7 +177,7 @@ public class VanillaInstaller implements MinecraftInstaller {
 
     private boolean verify() {
         try {
-            if (installer == null) {
+            if (updater == null) {
                 if (vanillaVersion == null) {
                     if (vanillaBuilder == null) {
                         vanillaBuilder = new VanillaVersion.VanillaVersionBuilder();
@@ -187,7 +187,7 @@ public class VanillaInstaller implements MinecraftInstaller {
                 if (builder == null) {
                     builder = new FlowUpdater.FlowUpdaterBuilder();
                 }
-                installer = builder.withVanillaVersion(vanillaVersion).build();
+                updater = builder.withVanillaVersion(vanillaVersion).build();
             }
             return true;
         } catch (Exception e) {

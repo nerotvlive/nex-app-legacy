@@ -1,7 +1,7 @@
 package com.zyneonstudios.apex.nexapp.launchprocess.modloaders.quilt;
 
 import com.zyneonstudios.apex.nexapp.Main;
-import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftInstaller;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.ModloaderInstaller;
 import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaInstaller;
 import fr.flowarg.flowupdater.versions.fabric.QuiltVersion;
 import fr.flowarg.flowupdater.versions.fabric.QuiltVersionBuilder;
@@ -9,7 +9,7 @@ import fr.flowarg.flowupdater.versions.fabric.QuiltVersionBuilder;
 import java.io.File;
 import java.nio.file.Path;
 
-public class QuiltInstaller extends VanillaInstaller implements MinecraftInstaller {
+public class QuiltInstaller extends VanillaInstaller implements ModloaderInstaller {
 
     private QuiltVersionBuilder quiltBuilder;
     private QuiltVersion quiltVersion;
@@ -35,6 +35,7 @@ public class QuiltInstaller extends VanillaInstaller implements MinecraftInstall
         return quiltVersion;
     }
 
+    @Override
     public String getModloaderVersion() {
         return modloaderVersion;
     }
@@ -49,6 +50,7 @@ public class QuiltInstaller extends VanillaInstaller implements MinecraftInstall
         return this;
     }
 
+    @Override
     public QuiltInstaller withModloaderVersion(String modloaderVersion) {
         this.modloaderVersion = modloaderVersion;
         return this;
@@ -61,8 +63,8 @@ public class QuiltInstaller extends VanillaInstaller implements MinecraftInstall
             if (vanillaInstall) {
                 if(verify()) {
                     try {
-                        withInstaller(getBuilder().withModLoaderVersion(quiltVersion).build());
-                        getInstaller().update(getPath());
+                        withUpdater(getBuilder().withModLoaderVersion(quiltVersion).build());
+                        getUpdater().update(getPath());
                         return true;
                     } catch (Exception e) {
                         Main.getLogger().err("[Quilt Installer] Failed to install quilt version ("+quiltVersion+") with vanilla version ("+getMinecraftVersion()+") at path ("+getPathString()+") with error: "+e.getMessage());

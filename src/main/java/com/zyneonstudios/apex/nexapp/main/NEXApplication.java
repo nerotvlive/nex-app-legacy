@@ -8,6 +8,11 @@ import com.zyneonstudios.apex.nexapp.downloads.DownloadManager;
 import com.zyneonstudios.apex.nexapp.frame.AppFrame;
 import com.zyneonstudios.apex.nexapp.frame.LegacyAppFrame;
 import com.zyneonstudios.apex.nexapp.frame.NativeAppFrame;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.fabric.FabricLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.forge.ForgeLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.neoforge.NeoForgeLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.quilt.QuiltLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaLauncher;
 import com.zyneonstudios.apex.nexapp.listeners.PageLoadListener;
 import com.zyneonstudios.apex.nexapp.main.console.NexusConsoleHandler;
 import com.zyneonstudios.apex.nexapp.main.console.commands.*;
@@ -15,7 +20,6 @@ import com.zyneonstudios.apex.nexapp.modules.ModuleLoader;
 import com.zyneonstudios.apex.nexapp.search.curseforge.CurseForgeCategories;
 import com.zyneonstudios.apex.nexapp.search.zyndex.local.LocalInstanceManager;
 import com.zyneonstudios.apex.nexapp.utilities.ApplicationLogger;
-import com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence;
 import com.zyneonstudios.apex.nexapp.utilities.MicrosoftAuthenticator;
 import com.zyneonstudios.apex.nexapp.web.RootController;
 import com.zyneonstudios.nexus.desktop.NexusDesktop;
@@ -26,7 +30,6 @@ import com.zyneonstudios.nexus.utilities.file.FileExtractor;
 import com.zyneonstudios.nexus.utilities.storage.JsonStorage;
 import com.zyneonstudios.nexus.utilities.system.OperatingSystem;
 import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
-import live.nerotv.aminecraftlauncher.launcher.*;
 import org.cef.CefApp;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
@@ -163,7 +166,11 @@ public class NEXApplication {
             rpc = settings.getBool("settings.discord.rpc");
         }
         if(rpc) {
-            DiscordRichPresence.startRPC();
+            try {
+                com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence.startRPC();
+            } catch (Exception e) {
+                getLogger().err("Failed to start Discord RPC: "+e.getMessage());
+            }
         }
 
         if(settings.has("settings.minecraft.defaultPath")) {
@@ -672,8 +679,12 @@ public class NEXApplication {
      *
      * @return A pre-initialized Vanilla launcher
      */
-    public VanillaLauncher getVanillaLauncher() {
-        return new VanillaLauncher(authInfos);
+    public live.nerotv.aminecraftlauncher.launcher.VanillaLauncher getVanillaLauncher() {
+        return new live.nerotv.aminecraftlauncher.launcher.VanillaLauncher(authInfos);
+    }
+
+    public VanillaLauncher getVanillaLauncher(String path) {
+        return new VanillaLauncher(path,authInfos);
     }
 
     /**
@@ -681,8 +692,12 @@ public class NEXApplication {
      *
      * @return A pre-initialized Fabric launcher
      */
-    public FabricLauncher getFabricLauncher() {
-        return new FabricLauncher(authInfos);
+    public live.nerotv.aminecraftlauncher.launcher.FabricLauncher getFabricLauncher() {
+        return new live.nerotv.aminecraftlauncher.launcher.FabricLauncher(authInfos);
+    }
+
+    public FabricLauncher getFabricLauncher(String path) {
+        return new FabricLauncher(path,authInfos);
     }
 
     /**
@@ -690,8 +705,12 @@ public class NEXApplication {
      *
      * @return A pre-initialized Forge launcher
      */
-    public ForgeLauncher getForgeLauncher() {
-        return new ForgeLauncher(authInfos);
+    public live.nerotv.aminecraftlauncher.launcher.ForgeLauncher getForgeLauncher() {
+        return new live.nerotv.aminecraftlauncher.launcher.ForgeLauncher(authInfos);
+    }
+
+    public ForgeLauncher getForgeLauncher(String path) {
+        return new ForgeLauncher(path,authInfos);
     }
 
     /**
@@ -699,8 +718,12 @@ public class NEXApplication {
      *
      * @return A pre-initialized NeoForge launcher
      */
-    public NeoForgeLauncher getNeoForgeLauncher() {
-        return new NeoForgeLauncher(authInfos);
+    public live.nerotv.aminecraftlauncher.launcher.NeoForgeLauncher getNeoForgeLauncher() {
+        return new live.nerotv.aminecraftlauncher.launcher.NeoForgeLauncher(authInfos);
+    }
+
+    public NeoForgeLauncher getNeoForgeLauncher(String path) {
+        return new NeoForgeLauncher(path,authInfos);
     }
 
     /**
@@ -708,8 +731,12 @@ public class NEXApplication {
      *
      * @return A pre-initialized Quilt launcher
      */
-    public QuiltLauncher getQuiltLauncher() {
-        return new QuiltLauncher(authInfos);
+    public live.nerotv.aminecraftlauncher.launcher.QuiltLauncher getQuiltLauncher() {
+        return new live.nerotv.aminecraftlauncher.launcher.QuiltLauncher(authInfos);
+    }
+
+    public QuiltLauncher getQuiltLauncher(String path) {
+        return new QuiltLauncher(path,authInfos);
     }
 
     /**

@@ -11,7 +11,7 @@ public interface MinecraftInstaller {
     String getPathString();
     FlowUpdater.FlowUpdaterBuilder getBuilder();
     VanillaVersion.VanillaVersionBuilder getVanillaBuilder();
-    FlowUpdater getInstaller();
+    FlowUpdater getUpdater();
     VanillaVersion getVanillaVersion();
     String getMinecraftVersion();
     MinecraftInstaller withPath(File file);
@@ -19,7 +19,7 @@ public interface MinecraftInstaller {
     MinecraftInstaller withPath(String pathString);
     MinecraftInstaller withBuilder(FlowUpdater.FlowUpdaterBuilder builder);
     MinecraftInstaller withVanillaBuilder(VanillaVersion.VanillaVersionBuilder versionBuilder);
-    MinecraftInstaller withInstaller(FlowUpdater installer);
+    MinecraftInstaller withUpdater(FlowUpdater installer);
     MinecraftInstaller withVanillaVersion(VanillaVersion vanillaVersion);
     MinecraftInstaller withMinecraftVersion(String version);
     boolean install();

@@ -1,7 +1,8 @@
 package com.zyneonstudios.apex.nexapp.launchprocess.modloaders.quilt;
 
 import com.zyneonstudios.apex.nexapp.Main;
-import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.ModloaderLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.fabric.FabricLauncher;
 import com.zyneonstudios.apex.nexapp.utilities.JavaUtilities;
 import com.zyneonstudios.nexus.utilities.system.OperatingSystem;
 import fr.flowarg.openlauncherlib.NoFramework;
@@ -12,24 +13,27 @@ import live.nerotv.aminecraftlauncher.launcher.MinecraftVersion;
 import java.io.File;
 import java.nio.file.Path;
 
-public class QuiltLauncher extends VanillaLauncher {
+public class QuiltLauncher extends FabricLauncher implements ModloaderLauncher {
 
     boolean running = false;
     private Process gameProcess;
     private String modloaderVersion;
+    private final AuthInfos authInfos;
 
-    public QuiltLauncher(File runDir) {
-        this(runDir.getAbsolutePath());
+    public QuiltLauncher(File runDir, AuthInfos authInfos) {
+        this(runDir.getAbsolutePath(), authInfos);
     }
 
-    public QuiltLauncher(Path runPath) {
-        this(runPath.toAbsolutePath().toString());
+    public QuiltLauncher(Path runPath, AuthInfos authInfos) {
+        this(runPath.toAbsolutePath().toString(), authInfos);
     }
 
-    public QuiltLauncher(String runPathString) {
-        super(runPathString);
+    public QuiltLauncher(String runPathString, AuthInfos authInfos) {
+        super(runPathString, authInfos);
+        this.authInfos = authInfos;
     }
 
+    @Override
     public String getModloaderVersion() {
         return modloaderVersion;
     }
@@ -44,6 +48,7 @@ public class QuiltLauncher extends VanillaLauncher {
         return gameProcess;
     }
 
+    @Override
     public QuiltLauncher withModloaderVersion(String modloaderVersion) {
         this.modloaderVersion = modloaderVersion;
         return this;
@@ -59,9 +64,10 @@ public class QuiltLauncher extends VanillaLauncher {
         }
         if(!running) {
             running = true;
+            getPreLaunchHook().run();
             if (getInstaller().install()) {
                 if(getFramework() == null) {
-                    withFramework(new NoFramework(getRunPath(), new AuthInfos("TestUser","", "uniqueid"), GameFolder.FLOW_UPDATER));
+                    withFramework(new NoFramework(getRunPath(), authInfos, GameFolder.FLOW_UPDATER));
                     getFramework().getAdditionalVmArgs().add("-Xms" + getMinMemory() + "M");
                     getFramework().getAdditionalVmArgs().add("-Xmx" + getMaxMemory() + "M");
                     if (OperatingSystem.getType() == OperatingSystem.Type.macOS) {
@@ -81,7 +87,12 @@ public class QuiltLauncher extends VanillaLauncher {
                 JavaUtilities.setJava(MinecraftVersion.getType(getMinecraftVersion()));
                 try {
                     this.gameProcess = getFramework().launch(getMinecraftVersion(), modloaderVersion, NoFramework.ModLoader.QUILT);
-                    this.gameProcess.onExit().thenRun(() -> running = false);
+                    getPostLaunchHook().run();
+                    this.gameProcess.onExit().thenRun(() -> {
+                        getPostCloseHook().run();
+                        gameProcess = null;
+                        running = false;
+                    });
                     return true;
                 } catch (Exception e) {
                     Main.getLogger().err("[Minecraft Launcher] Could not launch quilt "+modloaderVersion+" with vanilla " + getMinecraftVersion() + " in " + getInstaller().getPathString() + ": " + e.getMessage());

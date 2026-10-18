@@ -3,6 +3,7 @@ package com.zyneonstudios.apex.nexapp.launchprocess.vanilla;
 import com.zyneonstudios.apex.nexapp.Main;
 import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftInstaller;
 import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftLauncher;
+import com.zyneonstudios.apex.nexapp.launchprocess.hooks.MinecraftLauncherHook;
 import com.zyneonstudios.apex.nexapp.utilities.JavaUtilities;
 import com.zyneonstudios.nexus.utilities.system.OperatingSystem;
 import fr.flowarg.openlauncherlib.NoFramework;
@@ -29,18 +30,26 @@ public class VanillaLauncher implements MinecraftLauncher {
     private NoFramework framework;
     private Process gameProcess;
     private boolean running = false;
+    private MinecraftLauncherHook preLaunchHook = MinecraftLauncherHook.getPreLaunchHook(this);
+    private MinecraftLauncherHook postLaunchHook = MinecraftLauncherHook.getPostLaunchHook(this);
+    private MinecraftLauncherHook postCloseHook = MinecraftLauncherHook.getGameCloseHook(this);
+    private final AuthInfos authInfos;
 
-    public VanillaLauncher(File runDir) {
-        this(runDir.getAbsolutePath());
+    public VanillaLauncher(File runDir, AuthInfos authInfos) {
+        this(runDir.getAbsolutePath(), authInfos);
     }
 
-    public VanillaLauncher(Path runPath) {
-        this(runPath.toAbsolutePath().toFile());
+    public VanillaLauncher(Path runPath, AuthInfos authInfos) {
+        this(runPath.toAbsolutePath().toFile(), authInfos);
     }
 
-    public VanillaLauncher(String runPathString) {
+    public VanillaLauncher(String runPathString, AuthInfos authInfos) {
         if(verifyPath(runPathString)) {
-
+            if(authInfos == null) {
+                throw new IllegalArgumentException("[Minecraft Launcher] AuthInfos cannot be null!");
+            } else {
+                this.authInfos = authInfos;
+            }
         } else {
             throw new IllegalArgumentException("[Minecraft Launcher] Couldn't verify run directory ("+runPathString+")!");
         }
@@ -139,6 +148,21 @@ public class VanillaLauncher implements MinecraftLauncher {
         return framework;
     }
 
+    @Override
+    public MinecraftLauncherHook getPreLaunchHook() {
+        return preLaunchHook;
+    }
+
+    @Override
+    public MinecraftLauncherHook getPostLaunchHook() {
+        return postLaunchHook;
+    }
+
+    @Override
+    public MinecraftLauncherHook getPostCloseHook() {
+        return postCloseHook;
+    }
+
     public VanillaLauncher withInstaller(VanillaInstaller installer) {
         this.installer = installer;
         return this;
@@ -204,15 +228,34 @@ public class VanillaLauncher implements MinecraftLauncher {
     }
 
     @Override
+    public VanillaLauncher withPreLaunchHook(MinecraftLauncherHook preLaunchHook) {
+        this.preLaunchHook = preLaunchHook;
+        return this;
+    }
+
+    @Override
+    public VanillaLauncher withPostLaunchHook(MinecraftLauncherHook postLaunchHook) {
+        this.postLaunchHook = postLaunchHook;
+        return this;
+    }
+
+    @Override
+    public VanillaLauncher withPostCloseHook(MinecraftLauncherHook postCloseHook) {
+        this.postCloseHook = postCloseHook;
+        return this;
+    }
+
+    @Override
     public boolean launch() {
         if(installer == null) {
             installer = new VanillaInstaller(runDir).withMinecraftVersion(minecraftVersion);
         }
         if(!running) {
             running = true;
+            preLaunchHook.run();
             if (installer.install()) {
                 if(framework == null) {
-                    framework = new NoFramework(runPath, new AuthInfos("TestUser","", "uniqueid"), GameFolder.FLOW_UPDATER);
+                    framework = new NoFramework(runPath, authInfos, GameFolder.FLOW_UPDATER);
                     this.framework.getAdditionalVmArgs().add("-Xms" + minMemory + "M");
                     this.framework.getAdditionalVmArgs().add("-Xmx" + maxMemory + "M");
                     if (OperatingSystem.getType() == OperatingSystem.Type.macOS) {
@@ -232,7 +275,12 @@ public class VanillaLauncher implements MinecraftLauncher {
                 JavaUtilities.setJava(MinecraftVersion.getType(minecraftVersion));
                 try {
                     this.gameProcess = this.framework.launch(minecraftVersion, null, NoFramework.ModLoader.VANILLA);
-                    this.gameProcess.onExit().thenRun(() -> running = false);
+                    this.postLaunchHook.run();
+                    this.gameProcess.onExit().thenRun(() -> {
+                        this.postCloseHook.run();
+                        gameProcess = null;
+                        running = false;
+                    });
                     return true;
                 } catch (Exception e) {
                     Main.getLogger().err("[Minecraft Launcher] Could not launch vanilla " + minecraftVersion + " in " + installer.getPathString() + ": " + e.getMessage());

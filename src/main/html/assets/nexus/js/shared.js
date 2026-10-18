@@ -197,7 +197,7 @@ async function connector(s) {
 }
 
 function open(s) {
-
+    window.openUrl(s);
 }
 
 // --- Appearance Settings Initialization ---
@@ -283,7 +283,7 @@ let panelMode = "click";
  * Initializes the panel based on stored preferences or default values.
  */
 function initPanel() {
-    document.querySelector(".menu-panel").querySelector(".card-body").innerHTML = "<i onclick='window.open(`https://discord.gg/hbHDrqUjJ8`,`_blank`);' class='bi bi-discord'></i><i onclick='window.open(`https://github.com/nerotvlive/nex-app/tree/legacy`,`_blank`);' class='bi bi-github'></i><i onclick='connector(`exit`)' class='bi bi-door-open'></i>";
+    document.querySelector(".menu-panel").querySelector(".card-body").innerHTML = "<i onclick='window.open(`https://discord.gg/Q2AEWfesZW`,`_blank`);' class='bi bi-discord'></i><i onclick='window.open(`https://github.com/nerotvlive/nex-app-legacy`,`_blank`);' class='bi bi-github'></i><i onclick='connector(`exit`)' class='bi bi-door-open'></i>";
     const panel = document.querySelector(".menu-panel");
     if (!panel) return; // Exit if panel doesn't exist
 
