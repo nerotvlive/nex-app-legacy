@@ -2,7 +2,6 @@ package com.zyneonstudios.apex.nexapp.frame;
 
 import com.zyneonstudios.apex.nexapp.Main;
 import com.zyneonstudios.apex.nexapp.listeners.AsyncConnectorListener;
-import com.zyneonstudios.apex.nexapp.main.NEXApplication;
 import io.avaje.webview.Webview;
 
 import java.io.IOException;
@@ -37,8 +36,7 @@ public class WebviewAppFrame implements AppFrame {
                     initIcon();
 
                     this.webview.run();
-
-                    NEXApplication.stop(0);
+                    System.exit(0);
                 } catch (Throwable e) {
                     throw new RuntimeException("Failed to build or launch native webview", e);
                 }
