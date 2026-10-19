@@ -6,14 +6,12 @@ import com.starxg.keytar.Keytar;
 import com.zyneonstudios.apex.nexapp.Main;
 import com.zyneonstudios.apex.nexapp.downloads.DownloadManager;
 import com.zyneonstudios.apex.nexapp.frame.AppFrame;
-import com.zyneonstudios.apex.nexapp.frame.LegacyAppFrame;
 import com.zyneonstudios.apex.nexapp.frame.WebviewAppFrame;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.fabric.FabricLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.forge.ForgeLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.neoforge.NeoForgeLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.modloaders.quilt.QuiltLauncher;
 import com.zyneonstudios.apex.nexapp.launchprocess.vanilla.VanillaLauncher;
-import com.zyneonstudios.apex.nexapp.listeners.PageLoadListener;
 import com.zyneonstudios.apex.nexapp.main.console.NexusConsoleHandler;
 import com.zyneonstudios.apex.nexapp.main.console.commands.*;
 import com.zyneonstudios.apex.nexapp.modules.ModuleLoader;
@@ -21,29 +19,21 @@ import com.zyneonstudios.apex.nexapp.search.curseforge.CurseForgeCategories;
 import com.zyneonstudios.apex.nexapp.search.zyndex.local.LocalInstanceManager;
 import com.zyneonstudios.apex.nexapp.utilities.ApplicationLogger;
 import com.zyneonstudios.apex.nexapp.utilities.MicrosoftAuthenticator;
-import com.zyneonstudios.apex.nexapp.web.RootController;
-import com.zyneonstudios.nexus.desktop.frame.web.NexusWebSetup;
 import com.zyneonstudios.nexus.index.ReadableZyndex;
 import com.zyneonstudios.nexus.utilities.file.FileActions;
 import com.zyneonstudios.nexus.utilities.file.FileExtractor;
 import com.zyneonstudios.nexus.utilities.storage.JsonStorage;
 import com.zyneonstudios.nexus.utilities.system.OperatingSystem;
 import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
-import org.cef.CefApp;
-import org.cef.browser.CefBrowser;
-import org.cef.browser.CefFrame;
-import org.cef.callback.CefBeforeDownloadCallback;
-import org.cef.callback.CefDownloadItem;
-import org.cef.handler.CefDownloadHandlerAdapter;
-import org.cef.handler.CefLoadHandlerAdapter;
-import org.cef.network.CefRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 /**
  * The {@code NexusApplication} class is the main object and core component of the NEX App.
@@ -74,7 +64,6 @@ public class NEXApplication {
     // Application Components
     private final NexusEventHandler eventHandler = new NexusEventHandler();
     private final NexusRunner runner = new NexusRunner();
-    private NexusWebSetup webSetup;
     private ModuleLoader moduleLoader;
     private AppFrame applicationFrame = null;
     private final NexusConsoleHandler consoleHandler;
@@ -130,9 +119,6 @@ public class NEXApplication {
         getLogger().log("Loading settings...");
         settings.ensure("settings.window.mergeNavigation", operatingSystem.equals(OperatingSystem.Type.Windows));
         localSettings.setMergeNavigation(settings.getBool("settings.window.mergeNavigation"));
-
-        settings.ensure("settings.window.useFallback", !operatingSystem.equals(OperatingSystem.Type.Windows));
-        localSettings.setUseFallbackWindow(settings.getBool("settings.window.useFallback"));
 
         settings.ensure("settings.behavior.killOnExit",false);
         localSettings.setKillOnExit(settings.getBool("settings.behavior.killOnExit"));
@@ -217,10 +203,6 @@ public class NEXApplication {
         settings.ensure("settings.minecraft.onExitCommands",new ArrayList<>());
         localSettings.setDefaultMinecraftOnExitCommands((ArrayList<String>)settings.get("settings.minecraft.onExitCommands"));
 
-        if(localSettings.useFallbackWindow()||Main.useFallbackFrame()) {
-            setupWebEnvironment(workingDirFile);
-        }
-
         instanceManager = new LocalInstanceManager(new JsonStorage(workingDirFile.getAbsolutePath() + "/data/instances.json"));
         CurseForgeCategories.init();
 
@@ -294,66 +276,6 @@ public class NEXApplication {
     }
 
     /**
-     * Sets up the web environment for the application.
-     *
-     * @param workingDirFile The working directory file.
-     */
-    private void setupWebEnvironment(File workingDirFile) {
-        webSetup = new NexusWebSetup(workingDirFile.getAbsolutePath() + "/libs/cef/");
-        webSetup.getBuilder().getCefSettings().windowless_rendering_enabled = false;
-        webSetup.enableCache(true);
-        webSetup.enableCookies(true);
-        webSetup.setup();
-        webSetup.getWebClient().addDownloadHandler(new CefDownloadHandlerAdapter() {
-            @Override
-            public boolean onBeforeDownload(CefBrowser browser, CefDownloadItem downloadItem, String suggestedName, CefBeforeDownloadCallback callback) {
-                return true;
-            }
-        });
-        webSetup.getWebClient().addLoadHandler(new CefLoadHandlerAdapter() {
-            @Override
-            public void onLoadStart(CefBrowser browser, CefFrame frame, CefRequest.TransitionType transitionType) {
-                if(!RootController.isAllowedRequest(browser.getURL())) {
-                    if(NEXApplication.getInstance().isOnlineUI()) {
-                        browser.loadURL(NEXApplication.getInstance().getBaseUrl()+"?page=error601&url="+browser.getURL());
-                    } else {
-                        browser.loadURL(NEXApplication.getInstance().getBaseUrl()+"601?url="+browser.getURL());
-                    }
-                }
-            }
-
-            @Override
-            public void onLoadingStateChange(CefBrowser browser, boolean isLoading, boolean canGoBack, boolean canGoForward) {
-                if(!RootController.isAllowedRequest(browser.getURL())) {
-                    if(NEXApplication.getInstance().isOnlineUI()) {
-                        browser.loadURL(NEXApplication.getInstance().getBaseUrl()+"?page=error601&url="+browser.getURL());
-                    } else {
-                        browser.loadURL(NEXApplication.getInstance().getBaseUrl()+"601?url="+browser.getURL());
-                    }
-                }
-                if(applicationFrame!=null) {
-                    applicationFrame.executeJavaScript("version = \""+getVersion()+"\";");
-                    applicationFrame.executeJavaScript("document.getElementById('nexapp-titlebar').classList.add('hidden');");
-                    applicationFrame.executeJavaScript("document.getElementById('nexapp-content').classList.remove('rounded-tl-2xl'); document.getElementById('nexapp-content').classList.remove('border-t'); document.getElementById('nexapp-content').classList.remove('border-l');");
-                }
-            }
-        });
-        webSetup.getWebClient().addLoadHandler(new CefLoadHandlerAdapter() {
-            @Override
-            public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
-                if(applicationFrame!=null) {
-                    applicationFrame.executeJavaScript("version = \""+getVersion()+"\";");
-                    applicationFrame.executeJavaScript("document.getElementById('nexapp-titlebar').classList.add('hidden');");
-                    applicationFrame.executeJavaScript("document.getElementById('nexapp-content').classList.remove('rounded-tl-2xl'); document.getElementById('nexapp-content').classList.remove('border-t'); document.getElementById('nexapp-content').classList.remove('border-l');");
-                }
-            }
-        });
-
-        // Setup page load listener
-        eventHandler.addPageLoadedEvent(new PageLoadListener());
-    }
-
-    /**
      * Loads modules from the modules directory.
      */
     private void loadModules() {
@@ -379,15 +301,9 @@ public class NEXApplication {
     public boolean launch() {
         if (!launched) {
             String url = getBaseUrl()+"?app=true";
-            if(!Main.useFallbackFrame()&&!getLocalSettings().useFallbackWindow()) {
-                launched = launchNativeFrame(url);
-            }
-            if (!launched) {
-                if(launchFallbackFrame(url)) {
-                    launched = true;
-                } else {
-                    throw new RuntimeException("Couldn't launch application (even with legacy frame)");
-                }
+            launched = launchNativeFrame(url);
+            if(!launched) {
+                throw new RuntimeException("Couldn't launch application!");
             }
         }
 
@@ -404,18 +320,6 @@ public class NEXApplication {
             return true;
         } catch (Exception e) {
             getLogger().err("Failed to use native frame: " + e.getMessage());
-        }
-        return false;
-    }
-
-    private boolean launchFallbackFrame(String url) {
-        try {
-            applicationFrame = new LegacyAppFrame(webSetup, url, true);
-            applicationFrame.setVisible(true);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> CefApp.getInstance().dispose()));
-            return true;
-        } catch (Exception e) {
-            getLogger().err("Failed to use fallback frame: " + e.getMessage());
         }
         return false;
     }
@@ -449,90 +353,17 @@ public class NEXApplication {
             }
         } catch (Exception ignore) {}
         try {
-            if(getInstance().getLocalSettings().useFallbackWindow()||Main.useFallbackFrame()) {
-                disposeCef();
-                forceKillJcefHelpers();
-            }
-        } catch (Exception ignore) {}
-        try {
             getInstance().getApplicationFrame().close();
         } catch (Exception ignore) {}
         FileActions.deleteFolder(new File((NEXApplication.getInstance().getWorkingPath()+"/temp/").replace("\\","/").replace("//","/")));
         System.exit(exitCode);
     }
 
-    private static void disposeCef() {
-        try {
-            if (getInstance().getWebSetup() != null && getInstance().getWebSetup().getWebApp() != null) {
-                getInstance().getWebSetup().getWebApp().dispose();
-            }
-        } catch (Exception e) {
-            getLogger().err("Couldn't dispose web app: " + e.getMessage());
-        }
-        try {
-            CefApp.getInstance().dispose();
-        } catch (Exception e) {
-            getLogger().err("Couldn't dispose CEF: " + e.getMessage());
-        }
-    }
-
-    private static void forceKillJcefHelpers() {
-        try {
-            Stream<ProcessHandle> descendants = ProcessHandle.current().descendants();
-            descendants.filter(NEXApplication::isJcefHelperProcess)
-                    .forEach(NEXApplication::terminateProcess);
-        } catch (Exception e) {
-            getLogger().deb("Couldn't scan for jcef_helper processes: " + e.getMessage());
-        }
-    }
-
-    private static boolean isJcefHelperProcess(ProcessHandle handle) {
-        try {
-            Optional<String> command = handle.info().command();
-            Optional<String> commandLine = handle.info().commandLine();
-            String cmd = (command.orElse("") + " " + commandLine.orElse("")).toLowerCase();
-            return cmd.contains("jcef_helper") || cmd.contains("jcef-helper") || cmd.contains("jcef");
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private static void terminateProcess(ProcessHandle handle) {
-        try {
-            if (!handle.isAlive()) {
-                return;
-            }
-            handle.destroy();
-            if (waitForExit(handle, 1500)) {
-                return;
-            }
-            handle.destroyForcibly();
-            waitForExit(handle, 1500);
-        } catch (Exception e) {
-            getLogger().deb("Failed to terminate jcef_helper: " + e.getMessage());
-        }
-    }
-
-    private static boolean waitForExit(ProcessHandle handle, long timeoutMs) {
-        long end = System.currentTimeMillis() + timeoutMs;
-        while (handle.isAlive() && System.currentTimeMillis() < end) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        return !handle.isAlive();
-    }
-
-
     /**
      * Restarts the application.
      */
     public static void restart() {
         try {
-            getInstance().getWebSetup().getWebApp().dispose();
             String java = System.getProperty("java.home") + "/bin/java";
             File currentJar = new File(NEXApplication.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             if (!currentJar.getName().endsWith(".jar")) {
@@ -622,15 +453,6 @@ public class NEXApplication {
      */
     public AppFrame getApplicationFrame() {
         return applicationFrame;
-    }
-
-    /**
-     * Gets the web setup.
-     *
-     * @return The NexusWebSetup instance.
-     */
-    public NexusWebSetup getWebSetup() {
-        return webSetup;
     }
 
     /**

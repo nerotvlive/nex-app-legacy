@@ -12,7 +12,7 @@
         <maven.compiler.source>25</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <nexus.name>Praeparatio Ultima</nexus.name>
-        <nexus.type>stable</nexus.type>
+        <nexus.type>experimental</nexus.type>
         <app.mainClass>com.zyneonstudios.apex.nexapp.Main</app.mainClass>
         <app.name>NEX App (Legacy)</app.name>
         <app.vendor>Zyneon Apex</app.vendor>
@@ -42,24 +42,6 @@
             <artifactId>java-keytar</artifactId>
             <version>1.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>dev.masecla</groupId>
-            <artifactId>Modrinth4J</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.14.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio-jvm</artifactId>
-            <version>3.18.2</version>
-            <scope>runtime</scope>
-        </dependency>
 
         <!-- FLOWARG MINECRAFT LAUNCH PROCESS DEPENDENCIES -->
         <dependency>
@@ -87,23 +69,18 @@
         </dependency>
         <dependency>
             <groupId>com.zyneonstudios.nexus</groupId>
-            <artifactId>base-desktop</artifactId>
-            <version>2025.9</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zyneonstudios.nexus</groupId>
             <artifactId>zyndex-java</artifactId>
             <version>2025.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zyneonstudios.apex</groupId>
-            <artifactId>mojang-auth</artifactId>
-            <version>2025.12</version>
         </dependency>
         <dependency>
             <groupId>com.zyneonstudios.apex</groupId>
             <artifactId>jauri-webview</artifactId>
             <version>0.30</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zyneonstudios.apex</groupId>
+            <artifactId>mojang-auth</artifactId>
+            <version>2025.12</version>
         </dependency>
 
         <!-- JITPACK.IO REPOSITORY -->

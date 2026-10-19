@@ -2,22 +2,18 @@ package com.zyneonstudios.apex.nexapp;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.zyneonstudios.apex.nexapp.frame.LegacyZyneonSplash;
 import com.zyneonstudios.apex.nexapp.main.NEXApplication;
 import com.zyneonstudios.apex.nexapp.utilities.ApplicationLogger;
 import com.zyneonstudios.apex.nexapp.utilities.DiscordRichPresence;
-import com.zyneonstudios.nexus.desktop.NexusDesktop;
 import com.zyneonstudios.nexus.utilities.file.FileGetter;
 import com.zyneonstudios.nexus.utilities.json.GsonUtility;
 import com.zyneonstudios.nexus.utilities.strings.StringGenerator;
 import com.zyneonstudios.nexus.utilities.system.OperatingSystem;
+import io.avaje.webview.Webview;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -62,7 +58,6 @@ public class  Main {
     private static ServerSocket focusServer;
     private static int focusPort = -1;
     private static String skippedUpdate = "0";
-    private static boolean fallbackFrame = false;
 
     private static String version = StringGenerator.generateAlphanumericString(12);
     private static String versionType = "experimental";
@@ -76,10 +71,7 @@ public class  Main {
     static void main(String[] args) {
         System.setProperty("java.awt.headless", "false");
         logger.setName("NEX", true);
-        NexusDesktop.init();
 
-        LegacyZyneonSplash splash = new LegacyZyneonSplash();
-        splash.setVisible(true);
         // Resolve command-line arguments.
         Main.args = args;
         resolveArguments(args);
@@ -94,7 +86,6 @@ public class  Main {
 
         // Enforce single-instance execution with hung detection and focus.
         if (!ensureSingleInstance()) {
-            splash.dispose();
             return;
         }
 
@@ -118,11 +109,9 @@ public class  Main {
 
         // Launch the application and dispose of the splash screen if successful.
         if (application.launch()) {
-            splash.dispose();
             System.gc();
         } else {
             // Stop the application if launching fails.
-            splash.dispose();
             NEXApplication.stop(1);
         }
     }
@@ -181,7 +170,6 @@ public class  Main {
                         logger.log("  -p <path>, --path <path>: Lets you select the run folder.");
                         logger.log("  -u <path>, --ui <path>: Lets you select the folder where the user interface should be unpacked.");
                         logger.log("  -a <url>, --address <url>, --url <url>: Lets you select the address of the UI.");
-                        logger.log("  -fF, --fallbackFrame: Uses the legacy frame. (configurable in settings file)");
                         System.exit(0);
                     }
                     case "-u", "--ui" -> ui = args[i + 1];
@@ -189,7 +177,6 @@ public class  Main {
                     case "-p", "--path" -> path = args[i + 1];
                     case "-o", "--online" -> ui = "online";
                     case "-d", "--debug" -> logger.enableDebug();
-                    case "-ff", "--fallbackframe" -> fallbackFrame = true;
                 }
             } catch (Exception e) {
                 // Handle argument parsing errors.
@@ -198,10 +185,6 @@ public class  Main {
                 System.exit(1);
             }
         }
-    }
-
-    public static boolean useFallbackFrame() {
-        return fallbackFrame;
     }
 
     public static String getAdress() {
@@ -546,38 +529,22 @@ public class  Main {
                 JsonObject nexus = new Gson().fromJson(data, JsonObject.class);
                 String currentVersion = nexus.get("version").getAsString();
 
-                JFrame parent = null;
-
                 if(!latestVersion.equals(currentVersion)&&isWindowsEXE()) {
-                    int update = JOptionPane.showConfirmDialog(
-                            parent,
-                            "Do you want to update to the latest version?\n\nCurrent version: " + currentVersion+"\nLatest version: "+latestVersion,
-                            "NEX App update available!",
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.QUESTION_MESSAGE
-                    );
+                    Webview dialog = Webview.builder()
+                            .height(150)
+                            .width(400)
+                            .enableDeveloperTools(true)
+                            .borderless(true,true)
+                            .transparent(true)
+                            .maximizable(false)
+                            .resizable(false)
+                            .html("<html><body style='user-select: none; background-color: #242424; color: white; padding: 1rem; margin: 0; font-family: Arial, sans-serif; display: flex; align-items: center; height: calc(100vh - 2rem); text-align: center; flex-direction: column;'><h3 id='text'>There is a NEX App update available!<br>Do you want to download it?</h3><div id='buttons' style='display: flex; gap: 1rem; position: absolute; bottom: 1rem; right: 1rem;'><button onclick='window.no()' style='padding: 0.5rem 1rem; margin: 0'><h4 style='padding: 0; margin: 0'>No</h4></button><button onclick=\"document.body.innerHTML = `<div style='position: absolute; padding: 1rem 2rem; margin: 0; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem;'><h3 style='padding: 0; margin: 0;'>Downloading & Installing NEX App update</h3><progress style='width:100%;max-width:400px;filter:hue-rotate(60deg);'></progress></div>`; window.yes();\" style='padding: 0.5rem 1rem; margin: 0'><h4 style='padding: 0; margin: 0'>Yes</h4></button></div></body></html>")
+                            .build();
 
-                    if (update == JOptionPane.YES_OPTION) {
+                    dialog.bind("yes",(_)->{
                         File tempDir = new File(getDefaultPath()+"temp/");
                         logger.deb("Created temp folder: "+tempDir.mkdirs());
                         tempDir.deleteOnExit();
-
-                        JDialog frame = new JDialog(parent);
-                        frame.setTitle("NEX App updater");
-                        frame.setLayout(new BorderLayout());
-                        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-                        frame.setSize(400, 100);
-                        frame.setLocationRelativeTo(null);
-                        frame.setResizable(false);
-
-                        JProgressBar indeterminator = new JProgressBar();
-                        indeterminator.setIndeterminate(true);
-                        indeterminator.setStringPainted(true);
-                        indeterminator.setString("Downloading NEX App v"+latestVersion+"...");
-                        indeterminator.setBorder(new EmptyBorder(10, 10, 10, 10));
-                        frame.add(indeterminator, BorderLayout.CENTER);
-
-                        frame.setVisible(true);
 
                         File updater = FileGetter.downloadFile(jsonMeta.get("downloadUrl").getAsString(), getDefaultPath()+"temp/"+ StringGenerator.generateAlphanumericString(12) +"-nex-app-"+latestVersion+"-setup.exe");
                         if (updater != null && updater.exists()) {
@@ -617,13 +584,19 @@ public class  Main {
                                 System.exit(0);
                             } catch (IOException e) {
                                 logger.err(e.getMessage());
-                                return true;
                             }
-                            return false;
                         }
-                    } else {
+                        dialog.close();
+                        return null;
+                    });
+
+                    dialog.bind("no",(_)->{
                         skippedUpdate = latestVersion;
-                    }
+                        dialog.close();
+                        return null;
+                    });
+
+                    dialog.run();
                 }
             } catch (Exception e) {
                 logger.err(e.getMessage());

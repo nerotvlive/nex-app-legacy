@@ -29,7 +29,6 @@ public class ApplicationSettings {
     private ArrayList<String> defaultMinecraftOnLaunchCommands = new ArrayList<>();
     private ArrayList<String> defaultMinecraftOnExitCommands = new ArrayList<>();
     private boolean mergeNavigation = false;
-    private boolean useFallbackWindow = false;
 
     public boolean useKillOnExit() {
         return killOnExit;
@@ -38,15 +37,6 @@ public class ApplicationSettings {
     public void setKillOnExit(boolean killOnExit) {
         this.killOnExit = killOnExit;
         NEXApplication.getInstance().getSettings().set("settings.behavior.killOnExit", killOnExit);
-    }
-
-    public boolean useFallbackWindow() {
-        return useFallbackWindow;
-    }
-
-    public void setUseFallbackWindow(boolean useFallbackWindow) {
-        this.useFallbackWindow = useFallbackWindow;
-        NEXApplication.getInstance().getSettings().set("settings.window.useFallback", this.useFallbackWindow);
     }
 
     public HashMap<String, Object> getTemporarySettings() {

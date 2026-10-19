@@ -3,7 +3,6 @@ package com.zyneonstudios.apex.nexapp.listeners;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.starxg.keytar.Keytar;
-import com.zyneonstudios.apex.nexapp.Main;
 import com.zyneonstudios.apex.nexapp.events.PageLoadedEvent;
 import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftLauncherHook;
 import com.zyneonstudios.apex.nexapp.launchprocess.MinecraftVersionUtils;
@@ -22,7 +21,10 @@ import com.zyneonstudios.apex.nexapp.search.modrinth.search.facets.categories.Mo
 import com.zyneonstudios.apex.nexapp.search.zyndex.ZyndexIntegration;
 import com.zyneonstudios.apex.nexapp.search.zyndex.local.LocalInstance;
 import com.zyneonstudios.apex.nexapp.search.zyndex.local.LocalInstanceContent;
-import com.zyneonstudios.apex.nexapp.utilities.*;
+import com.zyneonstudios.apex.nexapp.utilities.FileUtilities;
+import com.zyneonstudios.apex.nexapp.utilities.JavaUtilities;
+import com.zyneonstudios.apex.nexapp.utilities.MicrosoftAuthenticator;
+import com.zyneonstudios.apex.nexapp.utilities.StringUtility;
 import com.zyneonstudios.nexus.instance.ReadableZynstance;
 import com.zyneonstudios.nexus.instance.Zynstance;
 import com.zyneonstudios.nexus.instance.ZynstanceBuilder;
@@ -56,7 +58,7 @@ public class AsyncConnectorListener {
     public void resolveMessage(String s) {
         NEXApplication.getLogger().deb("[CONNECTOR] Resolving "+s);
         NEXApplication.getInstance().getApplicationFrame().executeJavaScript("getUrl(window.location.href);");
-        NEXApplication.getInstance().getApplicationFrame().executeJavaScript("nativeApp = "+!(Main.useFallbackFrame()||NEXApplication.getInstance().getLocalSettings().useFallbackWindow())+";");
+        NEXApplication.getInstance().getApplicationFrame().executeJavaScript("nativeApp = true;");
         if(s.equals("titlebar.version")) {
             NEXApplication.getInstance().getApplicationFrame().executeJavaScript("document.getElementById('nexapp-titlebar-version').innerText = '("+NEXApplication.getInstance().getVersion()+")';");
         } else if (s.equals("download.pauseRunning")) {

@@ -2,8 +2,6 @@ package com.zyneonstudios.apex.nexapp.utilities;
 
 import com.zyneonstudios.nexus.utilities.logger.NexusLogger;
 
-import javax.swing.*;
-
 public class ApplicationLogger extends NexusLogger {
 
     public ApplicationLogger(String name) {
@@ -17,10 +15,6 @@ public class ApplicationLogger extends NexusLogger {
 
     public void err(String errorMessage, boolean dialog) {
         super.err(errorMessage);
-        if(dialog) {
-            JOptionPane.showMessageDialog(getParent(), errorMessage,
-                    "NEX App (Error)", JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     @Override
@@ -63,11 +57,5 @@ public class ApplicationLogger extends NexusLogger {
             output.append(s2).append("\n");
             err(s2,false);
         }
-        JOptionPane.showMessageDialog(getParent(), output.toString(),
-                "NEX App (Error)", JOptionPane.ERROR_MESSAGE);
-    }
-
-    private JFrame getParent() {
-        return null;
     }
 }
